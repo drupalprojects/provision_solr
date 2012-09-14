@@ -20,20 +20,37 @@
  * the public API for this service that are necessary.
  */
 class provisionService_solr_lucene extends provisionService_solr {
- /**
-  * Some common options handled upstream by the base service classes.
-  */
-
- /**
-  *   This service needs to have a port specified for it.
-  */
   public $has_port = TRUE;
+  public $template = 'solr.tpl.php';
 
- /**
-  *   The default value for the port input.
-  */
+  function init() {
+    parent::init();
+
+    $this->configs['server'][] = 'provisionConfig_solr';
+  }
+
+  function init_server() {
+    parent::init_server();
+
+    $reflect = new reflectionClass('provisionService_solr');
+    $base_dir_solr = dirname($reflect->getFilename());
+    $root_path = dirname($this->server->config_path);
+    $this->server->setProperty('lucene_search_server', 0);
+    $this->server->solr_conf_path = "{$root_path}/solr";
+    $this->server->solr_default_home = "{$base_dir_solr}/lucene/default_data/solr";
+    $this->server->solr_default_war = "{$base_dir_solr}/lucene/default_data/solr.war";
+    $this->server->solr_tpl = "{$base_dir_solr}/lucene/solr.tpl.php";
+  }
+
   function default_port() {
     return 8080;
+  }
+
+  function config_data($config = null, $class = null) {
+    $data = parent::config_data($config, $class);
+    $data['solr_conf_path'] = $this->server->solr_conf_path;
+    $data['solr_default_home'] = $this->server->solr_default_home;
+    $data['solr_default_war'] = $this->server->solr_default_war;
   }
 
  /**
@@ -48,38 +65,16 @@ class provisionService_solr_lucene extends provisionService_solr {
     return "sudo /etc/init.d/tomcat6 restart";
   }
 
-
-  /**
-   * Initialize this class, including option handling.
-   */
-  function init() {
-    // REMEMBER TO CALL THE PARENT!
-    parent::init();
-
-    /**
-     * Register configuration classes for the create_config / delete_config methods.
-     */
-    $this->configs['server'][] = 'provisionConfig_solr';
-  }
-
-  function init_server() {
-    parent::init_server();
-
-    $this->server->setProperty('lucene_search_server', 0);
-  }
-
   function save_server() {
     //$this->server->shell_exec($path . ' status');
     //$this->server->lucene_search_server = 1;
   }
 
   function verify_server_cmd() {
-//    provision_file()->copy(dirname(__FILE__) . '/schema.xml', $this->server->include_path . '/schema.xml');
-//    $this->sync($this->server->include_path . '/schema.xml');
-//    provision_file()->copy(dirname(__FILE__) . '/solrconfig.xml', $this->server->include_path . '/solrconfig.xml');
-//    $this->sync($this->server->include_path . '/solrconfig.xml');
-    // Call the parent at the end. it will restart the server when it finishes.
-    parent::verify_server_cmd();
+    provision_file()->create_dir($this->server->solr_conf_path , dt("Solr folder configuration"), 0770);
+    $this->sync($this->server->solr_conf_path, array(
+      'exclude' => $this->server->solr_conf_path . '/*',  // Make sure remote directory is created
+    ));
   }
 
 
@@ -90,9 +85,9 @@ class provisionService_solr_lucene extends provisionService_solr {
   }
 
   function solr_core_exists($solr_core_name) {
-    $path = $this->lucene_get_path();
+    $path = $this->server->solr_conf_path .'/'. $solr_core_name .'.xml';
 
-    if (provision_file()->exists($path .'/'. $solr_core_name)->status()) {
+    if (provision_file()->exists($path)->status()) {
       return TRUE;
     }
     
@@ -100,29 +95,35 @@ class provisionService_solr_lucene extends provisionService_solr {
   }
 
   function create_solr_core($solr_core_name) {
-    $path = $this->lucene_get_path();
+    //Copy a basic home solr
+    $home = $this->server->solr_conf_path .'/'. $solr_core_name .'_home';
+    if (!drush_copy_dir($this->server->solr_default_home, $home)) {
+      return drush_set_error('DRUSH_CREATE_SOLR', dt('Problems for copy default home solr to !dest.', array('!dest' => $home)));
+    }
 
-    $this->server->shell_exec('sudo mkdir '. $path .'/'. $solr_core_name);
-    $this->server->shell_exec('sudo cp -r /usr/share/tomcat6/solr/conf '. $path .'/'. $solr_core_name);
-    $data = array(
-      'action' => 'CREATE',
-      'name' => $solr_core_name,
-      'instanceDir' => $solr_core_name,
-      'config' => 'solrconfig.xml',
-      'schema' => 'schema.xml',
-      'dataDir' => 'data',
-    );
-    $this->server->shell_exec('sudo chown -R tomcat6:root ' . $path);
-    $this->server->shell_exec('curl http://localhost:8080/solr/admin/cores?action=CREATE&name='. $solr_core_name .'&instanceDir='. $solr_core_name .'&config=solrconfig.xml&schema=schema.xml&dataDir=data');
+    //Copy a basic warn file
+    $warn = $this->server->solr_conf_path .'/'. $solr_core_name .'.warn';
+    if (!drush_op('copy', $this->server->solr_default_war, $warn)) {
+      return drush_set_error('DRUSH_CREATE_SOLR', dt('Problems for copy default warn file solr to !dest.', array('!dest' => $warn)));
+    }
+
+    $template = file_get_contents($this->server->solr_tpl);
+    $xml_config = $this->server->solr_conf_path .'/'. $solr_core_name .'.xml';
+    $data = array('warn_file' => $warn, 'home_directory' => $home, 'solr_core_name' => $solr_core_name);
+    $status = provision_file()->file_put_contents($xml_config, $this->render_template($template, $data));
+
+    if (!$status) {
+      return drush_set_error('DRUSH_CREATE_SOLR', dt('Problem creating !dest.', array('!dest' => $xml_config)));
+    }
+
+    //Now change the owner and group
+//    provision_file()->chown($home, 'tomcat6', TRUE);
+//    provision_file()->chown($warn, 'tomcat6');
+//    provision_file()->chown($xml_config, 'tomcat6');
   }
 
   function purge_solr_core($solr_core_name) {
-    $path = lucene_get_path();
-
-    
-    $this->server->shell_exec('sudo ' . $path . ' stop');
-    $this->server->shell_exec('sudo ' . $path . ' purge ' . $solr_core_name);
-//    $this->server->shell_exec('sudo ' . $path . ' start');
+    return TRUE;
   }
 
   function connect($name) {
@@ -131,5 +132,15 @@ class provisionService_solr_lucene extends provisionService_solr {
     return TRUE;
   }
 
+  function render_template($template, $variables) {
+    drush_errors_off();
+    extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
+    ob_start();                      // Start output buffering
+    eval('?>'. $template);                 // Generate content
+    $contents = ob_get_contents();   // Get the contents of the buffer
+    ob_end_clean();                  // End buffering and discard
+    drush_errors_on();
+    return $contents;                // Return the contents
+  }
 }
 
