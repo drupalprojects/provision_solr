@@ -66,12 +66,10 @@ class provisionService_solr_lucene extends provisionService_solr {
   }
 
   function save_server() {
-    //$this->server->shell_exec($path . ' status');
-    //$this->server->lucene_search_server = 1;
   }
 
   function verify_server_cmd() {
-    provision_file()->create_dir($this->server->solr_conf_path , dt("Solr folder configuration"), 0770);
+    provision_file()->create_dir($this->server->solr_conf_path , dt("Solr folder configuration"), 0775);
     $this->sync($this->server->solr_conf_path, array(
       'exclude' => $this->server->solr_conf_path . '/*',  // Make sure remote directory is created
     ));
@@ -94,6 +92,16 @@ class provisionService_solr_lucene extends provisionService_solr {
     return FALSE;
   }
 
+  function destroy_site_core($solr_core_name) {
+    //Delete file configuration
+    $home = $this->server->solr_conf_path .'/'. $solr_core_name .'_home';
+    $war = $this->server->solr_conf_path .'/'. $solr_core_name .'.war';
+    $xml_config = $this->server->solr_conf_path .'/'. $solr_core_name .'.xml';
+    provision_file()->rmdir($home);
+    provision_file()->unlink($war);
+    provision_file()->unlink($xml_config);
+  }
+
   function create_solr_core($solr_core_name) {
     //Copy a basic home solr
     $home = $this->server->solr_conf_path .'/'. $solr_core_name .'_home';
@@ -101,25 +109,27 @@ class provisionService_solr_lucene extends provisionService_solr {
       return drush_set_error('DRUSH_CREATE_SOLR', dt('Problems for copy default home solr to !dest.', array('!dest' => $home)));
     }
 
-    //Copy a basic warn file
-    $warn = $this->server->solr_conf_path .'/'. $solr_core_name .'.warn';
-    if (!drush_op('copy', $this->server->solr_default_war, $warn)) {
-      return drush_set_error('DRUSH_CREATE_SOLR', dt('Problems for copy default warn file solr to !dest.', array('!dest' => $warn)));
+    //Copy a basic war file
+    $war = $this->server->solr_conf_path .'/'. $solr_core_name .'.war';
+    if (!drush_op('copy', $this->server->solr_default_war, $war)) {
+      return drush_set_error('DRUSH_CREATE_SOLR', dt('Problems for copy default war file solr to !dest.', array('!dest' => $war)));
     }
 
     $template = file_get_contents($this->server->solr_tpl);
     $xml_config = $this->server->solr_conf_path .'/'. $solr_core_name .'.xml';
-    $data = array('warn_file' => $warn, 'home_directory' => $home, 'solr_core_name' => $solr_core_name);
+    $data = array('war_file' => $war, 'home_directory' => $home, 'solr_core_name' => $solr_core_name);
     $status = provision_file()->file_put_contents($xml_config, $this->render_template($template, $data));
 
     if (!$status) {
       return drush_set_error('DRUSH_CREATE_SOLR', dt('Problem creating !dest.', array('!dest' => $xml_config)));
     }
 
-    //Now change the owner and group
-//    provision_file()->chown($home, 'tomcat6', TRUE);
-//    provision_file()->chown($warn, 'tomcat6');
-//    provision_file()->chown($xml_config, 'tomcat6');
+    //Now change the permissions
+    provision_file()->chmod($home, 0777, TRUE);
+    provision_file()->chmod($war, 0755);
+    provision_file()->chmod($xml_config, 0755);
+
+    return TRUE;
   }
 
   function purge_solr_core($solr_core_name) {

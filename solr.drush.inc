@@ -42,7 +42,7 @@ function sol_provision_drush_init(){
  *   An array with the service type the key, and the default implementation the value.
  */
 function solr_provision_services() {
-  return array('solr' => NULL);
+  return array('solr' => 'lucene');
 }
 
 /**
@@ -94,10 +94,9 @@ class provisionService_solr extends provisionService {
   }
 
   /**
-   * Generate a new solr_core and user account for the specified credentials
-   * TODO: why we do have create_site_solr_core and create_solr_core? One of those should be at least protected
+   * Generate a new solr_core
    */
-  function create_site_solr_core($creds = array(), $force = FALSE) { watchdog('hola', 'sucess');
+  function create_site_solr_core($creds = array(), $force = FALSE) {
     if (!sizeof($creds)) {
       $creds = $this->fetch_site_credentials();
     }
@@ -167,8 +166,6 @@ class provisionService_solr extends provisionService {
   /**
    * Deletes the alias and removes the dat-folder
    * @param the alias of the core $name
-   * TODO: why bool?
-   * @return bool ?
    */
   function purge_solr_core($name) {
     return FALSE;
