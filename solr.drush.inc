@@ -18,11 +18,11 @@
  */
 function sol_provision_drush_init(){
   $path_to_provision = drush_get_option('path_to_provision_inc');
-  if (!file_exists($path_to_provision)){
-    return drush_set_error(dt('Provision not found.  This is a known bug.  Please place the following in your drushrc.php file:') ."\n". '$options["path_to_provision_inc"] = "/var/aegir/.drush/provision/provision.inc";');
-  }
-
-  $service_provision = str_replace('provision.inc', 'provision.service.inc', $path_to_provision);
+ $list = drush_commandfile_list();
+ $provision_drush_inc = $list['provision'];
+ include_once($provision_drush_inc);
+ 
+  $service_provision = str_replace('provision.inc', 'provision.service.inc', $provision_drush_inc);
 
   include_once($path_to_provision);
   include_once($service_provision);
