@@ -113,7 +113,7 @@ class provisionService_solr_lucene extends provisionService_solr {
   }
 
   function create_solr_core($solr_core_name) {
-    if (solr_core_exists($solr_core_name)) {
+    if ($this->solr_core_exists($solr_core_name)) {
       drush_log(dt('The solr instance !name already exists', array('!name' => $solr_core_name)));
       return TRUE;
     }
