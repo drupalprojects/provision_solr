@@ -1,6 +1,8 @@
 <?php
  // $Id$
 
+define ('CATALINA_HOME', '/etc/tomcat6/Catalina/localhost/');
+
  /**
   * @file
   *   A 'lucene' implementation of the 'solr' service type.
@@ -33,12 +35,12 @@ class provisionService_solr_lucene extends provisionService_solr {
     parent::init_server();
 
     $reflect = new reflectionClass('provisionService_solr');
+    $app_dir = "{$this->server->config_path}/{$this->application_name}";
     $base_dir_solr = dirname($reflect->getFilename());
-    $root_path = dirname($this->server->config_path);
     $this->server->setProperty('lucene_search_server', 0);
-    $this->server->solr_conf_path = "{$root_path}/solr";
+    $this->server->solr_conf_path = "{$app_dir}solr";
+    $this->server->tomcat6_conf_path = "{$app_dir}tomcat6";
     $this->server->solr_default_home = "{$base_dir_solr}/lucene/default_data/solr";
-    $this->server->solr_default_war = "{$base_dir_solr}/lucene/default_data/solr.war";
     $this->server->solr_tpl = "{$base_dir_solr}/lucene/solr.tpl.php";
   }
 
@@ -51,6 +53,7 @@ class provisionService_solr_lucene extends provisionService_solr {
     $data['solr_conf_path'] = $this->server->solr_conf_path;
     $data['solr_default_home'] = $this->server->solr_default_home;
     $data['solr_default_war'] = $this->server->solr_default_war;
+    $data['tomcat6_conf_path'] = $this->server->tomcat6_conf_path;
   }
 
  /**
@@ -69,9 +72,15 @@ class provisionService_solr_lucene extends provisionService_solr {
   }
 
   function verify_server_cmd() {
+
     provision_file()->create_dir($this->server->solr_conf_path , dt("Solr folder configuration"), 0775);
     $this->sync($this->server->solr_conf_path, array(
       'exclude' => $this->server->solr_conf_path . '/*',  // Make sure remote directory is created
+    ));
+
+    provision_file()->create_dir($this->server->tomcat6_conf_path , dt("Solr folder configuration"), 0775);
+    $this->sync($this->server->tomcat6_conf_path, array(
+      'exclude' => $this->server->tomcat6_conf_path . '/*',  // Make sure remote directory is created
     ));
   }
 
@@ -94,40 +103,38 @@ class provisionService_solr_lucene extends provisionService_solr {
 
   function destroy_site_core($solr_core_name) {
     //Delete file configuration
-    $home = $this->server->solr_conf_path .'/'. $solr_core_name .'_home';
-    $war = $this->server->solr_conf_path .'/'. $solr_core_name .'.war';
+    $home = $this->server->solr_conf_path .'/'. $solr_core_name;;
     $xml_config = $this->server->solr_conf_path .'/'. $solr_core_name .'.xml';
+    $xml_symlink = CATALINA_HOME. $solr_core_name .'.xml';    
+
     provision_file()->rmdir($home);
-    provision_file()->unlink($war);
     provision_file()->unlink($xml_config);
+    provision_file()->unlink($xml_symlink);
   }
 
   function create_solr_core($solr_core_name) {
     //Copy a basic home solr
-    $home = $this->server->solr_conf_path .'/'. $solr_core_name .'_home';
+    $home = $this->server->solr_conf_path .'/'. $solr_core_name;
     if (!drush_copy_dir($this->server->solr_default_home, $home)) {
       return drush_set_error('DRUSH_CREATE_SOLR', dt('Problems for copy default home solr to !dest.', array('!dest' => $home)));
     }
 
-    //Copy a basic war file
-    $war = $this->server->solr_conf_path .'/'. $solr_core_name .'.war';
-    if (!drush_op('copy', $this->server->solr_default_war, $war)) {
-      return drush_set_error('DRUSH_CREATE_SOLR', dt('Problems for copy default war file solr to !dest.', array('!dest' => $war)));
-    }
-
     $template = file_get_contents($this->server->solr_tpl);
-    $xml_config = $this->server->solr_conf_path .'/'. $solr_core_name .'.xml';
-    $data = array('war_file' => $war, 'home_directory' => $home, 'solr_core_name' => $solr_core_name);
+    $xml_config = $this->server->tomcat6_conf_path .'/'. $solr_core_name .'.xml';
+    $data = array('home_directory' => $home);
     $status = provision_file()->file_put_contents($xml_config, $this->render_template($template, $data));
 
     if (!$status) {
       return drush_set_error('DRUSH_CREATE_SOLR', dt('Problem creating !dest.', array('!dest' => $xml_config)));
     }
 
-    //Now change the permissions
+    //Create symlink for tomcat6
+    provision_file()->symlink($xml_config, CATALINA_HOME. $solr_core_name .'.xml')
+      ->succeed('Created symlink for tomcat6 @target')
+      ->fail('Could not create symlink for tomcat6 @target');
+
+    //Change permissions
     provision_file()->chmod($home, 0777, TRUE);
-    provision_file()->chmod($war, 0755);
-    provision_file()->chmod($xml_config, 0755);
 
     return TRUE;
   }
@@ -137,7 +144,6 @@ class provisionService_solr_lucene extends provisionService_solr {
   }
 
   function connect($name) {
-    // We can test this by connecting to http://<host>:<port>/solr/<solr_core_name>/admin/
     // for now return TRUE
     return TRUE;
   }
