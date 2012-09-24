@@ -5,8 +5,12 @@ apt-get install tomcat6 tomcat6-admin tomcat6-common tomcat6-user
 
 #Download and extract latest tested solr instance
 cd /tmp
-wget http://apache.osuosl.org/lucene/solr/3.6.1/apache-solr-3.6.1.tgz
-tar -xvzf apache-solr-3.6.1.tgz
+if [ -r apache-solr-3.6.1.tgz ]; then
+  echo "The file exists"
+else
+  wget http://apache.osuosl.org/lucene/solr/3.6.1/apache-solr-3.6.1.tgz
+  tar -xvzf apache-solr-3.6.1.tgz
+fi
 
 #Create a shared folder for solr and move solr.war into it.
 mkdir /usr/share/tomcat6/solr
