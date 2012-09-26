@@ -1,7 +1,8 @@
 #!/bin/bash
 
 SOLR_HOME=/etc/tomcat6/Catalina/localhost
-SERVER_NAME=/var/aegir/config/server_master
+AEGIR_HOME=/var/aegir
+SERVER_NAME=server_master
 
 if [ -n $1 ]; then
   SERVER_NAME=$1
@@ -39,7 +40,7 @@ usermod aegir -G aegir,tomcat6,www-data
 chown aegir $SOLR_HOME
 
 #Remove folder localhost tomcat6 and create symlink
-rm -rf $SOLR_HOME && ln -s /var/aegir/config/server_master/tomcat6 $SOLR_HOME
+rm -rf $SOLR_HOME && ln -s $AEGIR_HOME/config/$SERVER_NAME/tomcat6 $SOLR_HOME
 
 #Allow aegir to restart tomcat6 without a password
 #@TODO: Is this OPTIONAL? If conifgured to autopull, no need to restart tomcat6
