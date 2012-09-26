@@ -3,6 +3,10 @@
  1. Install tomcat6
  ==============================
  Execute install.sh (You need execute with sudo)
+ For local aegir server: ./install.sh
+ For remote server: ./install.sh path_to_conf_server
+
+Example remote server: ./install.sh /var/aegir/config/server_thinkdrop
 
 NOTE: You need sudo for execute this script
 
