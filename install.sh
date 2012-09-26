@@ -8,6 +8,7 @@ if [ -n $1 ]; then
 fi
 
 #Install tomcat6
+apt-get update
 apt-get install tomcat6 tomcat6-admin tomcat6-common tomcat6-user
 
 #Download and extract latest tested solr instance
