@@ -30,6 +30,9 @@ usermod aegir -G aegir,tomcat6,www-data
 #Give aegir ownership of Catalina's localhost folder, so aegir can later write symlinks
 chown aegir /etc/tomcat6/Catalina/localhost
 
+#Remove folder localhost tomcat6 and create symlink
+rm -rf /etc/tomcat6/Catalina/localhost && ln -s /var/aegir/config/server_master/tomcat6 /etc/tomcat6/Catalina/localhost
+
 #Allow aegir to restart tomcat6 without a password
 #@TODO: Is this OPTIONAL? If conifgured to autopull, no need to restart tomcat6
 echo 'aegir ALL=NOPASSWD: /etc/init.d/tomcat6' >> /etc/sudoers.d/aegir

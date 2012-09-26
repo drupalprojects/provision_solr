@@ -58,6 +58,7 @@ class provisionService_solr extends provisionService {
   static function subscribe_site($context) {
     $context->setProperty('solr', drush_get_option('solr',0));
     $context->setProperty('solr_core_name', drush_get_option('site_machine_name',NULL));
+    $context->setProperty('solr_server', drush_get_option('solr_server',0));
   }
 
   /**
@@ -76,7 +77,7 @@ class provisionService_solr extends provisionService {
   function suggest_solr_core_name() {
     $uri = $this->context->uri;
 
-    $suggest_base = 'aegir-' . substr(str_replace(array('.', '-'), '' , preg_replace('/^www\./', '', $uri)), 0);
+    $suggest_base = $uri;
 
     if (!$this->solr_core_exists($suggest_base)) {
       return $suggest_base;
@@ -149,6 +150,7 @@ class provisionService_solr extends provisionService {
     $creds = array();
     $creds['solr'] = drush_get_option('solr', '');
     $creds['solr_core_name'] = drush_get_option('solr_core_name', '');
+    $creds['solr_server'] = drush_get_option('solr_server', 0);
 
     if($creds['solr_core_name'] == '') {
       $creds['solr_core_name'] = $this->suggest_solr_core_name();
