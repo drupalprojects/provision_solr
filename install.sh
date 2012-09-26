@@ -1,5 +1,12 @@
 #!/bin/bash
 
+SOLR_HOME=/etc/tomcat6/Catalina/localhost
+SERVER_NAME=/var/aegir/config/server_master
+
+if [ -n $1 ]; then
+  SERVER_NAME=$1
+fi
+
 #Install tomcat6
 apt-get install tomcat6 tomcat6-admin tomcat6-common tomcat6-user
 
@@ -28,10 +35,10 @@ usermod tomcat6 -G tomcat6,aegir
 usermod aegir -G aegir,tomcat6,www-data
 
 #Give aegir ownership of Catalina's localhost folder, so aegir can later write symlinks
-chown aegir /etc/tomcat6/Catalina/localhost
+chown aegir $SOLR_HOME
 
 #Remove folder localhost tomcat6 and create symlink
-rm -rf /etc/tomcat6/Catalina/localhost && ln -s /var/aegir/config/server_master/tomcat6 /etc/tomcat6/Catalina/localhost
+rm -rf $SOLR_HOME && ln -s /var/aegir/config/server_master/tomcat6 $SOLR_HOME
 
 #Allow aegir to restart tomcat6 without a password
 #@TODO: Is this OPTIONAL? If conifgured to autopull, no need to restart tomcat6
