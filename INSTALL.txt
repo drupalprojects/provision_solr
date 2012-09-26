@@ -2,7 +2,7 @@
 
  1. Install tomcat6
  ==============================
- Execute install.sh
+ Execute install.sh (You need execute with sudo)
 
 NOTE: You need sudo for execute this script
 
