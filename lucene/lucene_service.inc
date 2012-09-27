@@ -37,6 +37,7 @@ class provisionService_solr_lucene extends provisionService_solr {
 
     $this->server->solr_server = drush_get_option('solr_server', 0);
     $reflect = new reflectionClass('provisionService_solr');
+    _drush_sitealias_load_alias($this->server->solr_server);
     $all_site_aliases = drush_get_context('site-aliases');
     $app_dir = $all_site_aliases[$this->server->solr_server]['config_path'] .'/';
 
@@ -78,14 +79,10 @@ class provisionService_solr_lucene extends provisionService_solr {
     $tomcat6_conf_path = "{$app_dir}tomcat6";
 
     provision_file()->create_dir($solr_conf_path , dt("Solr folder configuration"), 0775);
-    $this->sync($solr_conf_path, array(
-      'exclude' => $solr_conf_path . '/*',  // Make sure remote directory is created
-    ));
+    $this->sync($solr_conf_path);
 
     provision_file()->create_dir($tomcat6_conf_path , dt("Solr folder configuration"), 0775);
-    $this->sync($tomcat6_conf_path, array(
-      'exclude' => $tomcat6_conf_path . '/*',  // Make sure remote directory is created
-    ));
+    $this->sync($tomcat6_conf_path);
   }
 
 
