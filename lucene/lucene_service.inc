@@ -139,6 +139,14 @@ class provisionService_solr_lucene extends provisionService_solr {
     //Change permissions
     provision_file()->chmod($home, 0777, TRUE);
 
+   //sync to remote server if is need
+   $app_dir = "{$this->server->config_path}/{$this->application_name}";
+   $solr_conf_path = "{$app_dir}solr";
+   $tomcat6_conf_path = "{$app_dir}tomcat6";
+
+   $this->sync($solr_conf_path);
+   $this->sync($tomcat6_conf_path);
+
     return TRUE;
   }
 
