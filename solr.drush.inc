@@ -67,9 +67,9 @@ class provisionService_solr extends provisionService {
    * @return v
    */
   function verify_site_cmd() {
-    // TODO: if the old alias has change we should cleanup the old.. but how to remember what the old was
-    // guess this should be a trigger in hostmaster
-    $this->create_site_solr_core();
+    if ($this->server->solr_server) {
+      $this->create_site_solr_core();
+    }
   }
   /**
    * Find a viable solr_core name, based on the site's uri.
