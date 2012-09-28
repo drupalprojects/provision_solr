@@ -57,7 +57,6 @@ class provisionService_solr_lucene extends provisionService_solr {
     $data = parent::config_data($config, $class);
     $data['solr_conf_path'] = $this->server->solr_conf_path;
     $data['solr_default_home'] = $this->server->solr_default_home;
-    $data['solr_default_war'] = $this->server->solr_default_war;
     $data['tomcat6_conf_path'] = $this->server->tomcat6_conf_path;
   }
 
@@ -140,12 +139,10 @@ class provisionService_solr_lucene extends provisionService_solr {
     provision_file()->chmod($home, 0777, TRUE);
 
    //sync to remote server if is need
-   $app_dir = "{$this->server->config_path}/{$this->application_name}";
-   $solr_conf_path = "{$app_dir}solr";
-   $tomcat6_conf_path = "{$app_dir}tomcat6";
-
-   $this->sync($solr_conf_path);
-   $this->sync($tomcat6_conf_path);
+   $this->sync($this->server->solr_conf_path);
+   drush_log(dt('Synced content for @dir', array('@dir' => $this->server->solr_conf_path)));
+   $this->sync($this->server->tomcat6_conf_path);
+   drush_log(dt('Synced content for @dir', array('@dir' => $this->server->tomcat6_conf_path)));
 
     return TRUE;
   }
