@@ -138,13 +138,36 @@ class provisionService_solr_lucene extends provisionService_solr {
     //Change permissions
     provision_file()->chmod($home, 0777, TRUE);
 
-   //sync to remote server if is need
-   $this->sync($this->server->solr_conf_path);
-   drush_log(dt('Synced content for @dir', array('@dir' => $this->server->solr_conf_path)));
-   $this->sync($this->server->tomcat6_conf_path);
-   drush_log(dt('Synced content for @dir', array('@dir' => $this->server->tomcat6_conf_path)));
+    //Sync if is different server_master
+    if ($this->server->solr_server != '@server_master') {
+      _drush_sitealias_load_alias($this->server->solr_server);
+      $all_site_aliases = drush_get_context('site-aliases');
+      $remote_server = $all_site_aliases[$this->server->solr_server];
+
+     //sync to remote server if is need
+     $this->sync_site_conf($this->server->solr_conf_path, $remote_server['remote_host']);
+  //   drush_log(dt('Synced content for @dir', array('@dir' => $this->server->solr_conf_path)));
+     $this->sync_site_conf($this->server->tomcat6_conf_path, $remote_server['remote_host']);
+  //   drush_log(dt('Synced content for @dir', array('@dir' => $this->server->tomcat6_conf_path)));
+    }
 
     return TRUE;
+  }
+
+  function sync_site_conf($path, $remote_host) {
+    $options = array(
+      'relative' => TRUE,
+      'keep-dirlinks' => TRUE,
+      'omit-dir-times' => TRUE,
+    );
+
+    $script_user = provision_current_user();
+    if (drush_core_call_rsync(escapeshellarg($path), escapeshellarg($script_user . '@' . $remote_host . ':/'), $options, TRUE, FALSE)) {
+      drush_log(dt('@path has been synced to remote server @remote_host.', array('@path' => $path, '@remote_host' => $remote_host)));
+    }
+    else {
+      drush_set_error('PROVISION_FILE_SYNC_FAILED', dt('@path could not be synced to remote server @remote_host. Changes might not be available until this has been done. (error: %msg)', array('@path' => $path, '@remote_host' => $remote_host, '%msg' => join("\n", drush_shell_exec_output()))));
+    }
   }
 
   function purge_solr_core($solr_core_name) {
