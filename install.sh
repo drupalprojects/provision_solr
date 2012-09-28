@@ -40,7 +40,7 @@ usermod aegir -G aegir,tomcat6,www-data
 chown aegir $SOLR_HOME
 
 #Remove folder localhost tomcat6 and create symlink
-rm -rf $SOLR_HOME && ln -s $AEGIR_HOME/config/$SERVER_NAME/tomcat6 $SOLR_HOME
+rm -rf $SOLR_HOME && ln -s $SOLR_HOME $AEGIR_HOME/config/$SERVER_NAME/tomcat6
 
 #Allow aegir to restart tomcat6 without a password
 #@TODO: Is this OPTIONAL? If conifgured to autopull, no need to restart tomcat6
