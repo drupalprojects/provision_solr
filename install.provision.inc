@@ -2,7 +2,7 @@
 // $Id$
 
 function drush_solr_provision_install() {
-  if (d()->type == 'site') {
+  if (d()->type == 'site' && d()->service('solr')->context->solr) {
     d()->service('solr')->create_config('site');
     d()->service('solr')->create_site_solr_core();
   }
