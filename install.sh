@@ -25,7 +25,7 @@ fi
 mkdir /usr/share/tomcat6/solr
 mkdir /usr/share/tomcat6/webapps
 cp apache-solr-3.6.1/example/webapps/solr.war /usr/share/tomcat6/webapps/solr.war
-cp -r apache-solr-3.6.1/example/solr /usr/share/tomcat6/solr
+cp -r apache-solr-3.6.1/example/solr/* /usr/share/tomcat6/solr
 
 #Change own
 chown -R tomcat6 /usr/share/tomcat6
@@ -40,6 +40,7 @@ usermod aegir -G aegir,tomcat6,www-data
 chown aegir $SOLR_HOME
 
 #Remove folder localhost tomcat6 and create symlink
+# @TODO: Move this to the server Verify command?  We might want a verify.sh
 rm -rf $SOLR_HOME && ln -s $AEGIR_HOME/config/$SERVER_NAME/tomcat6 $SOLR_HOME
 
 #Allow aegir to restart tomcat6 without a password
