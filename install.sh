@@ -8,7 +8,7 @@ if [ -n $1 ]; then
   SERVER_NAME=$1
 fi
 
-#Install tomcat6
+# Install tomcat6
 apt-get update
 apt-get install tomcat6 tomcat6-admin tomcat6-common tomcat6-user
 
@@ -24,8 +24,8 @@ fi
 #Create a shared folder for solr and move solr.war into it.
 mkdir /usr/share/tomcat6/solr
 mkdir /usr/share/tomcat6/webapps
-cp apache-solr-3.6.1/example/webapps/solr.war /usr/share/webapps/solr.war
-cp -r apache-solr.3.6.1/example/solr /usr/share/tomcat6/solr
+cp apache-solr-3.6.1/example/webapps/solr.war /usr/share/tomcat6/webapps/solr.war
+cp -r apache-solr-3.6.1/example/solr /usr/share/tomcat6/solr
 
 #Change own
 chown -R tomcat6 /usr/share/tomcat6
@@ -40,7 +40,7 @@ usermod aegir -G aegir,tomcat6,www-data
 chown aegir $SOLR_HOME
 
 #Remove folder localhost tomcat6 and create symlink
-rm -rf $SOLR_HOME && ln -s $SOLR_HOME $AEGIR_HOME/config/$SERVER_NAME/tomcat6
+rm -rf $SOLR_HOME && ln -s $AEGIR_HOME/config/$SERVER_NAME/tomcat6 $SOLR_HOME
 
 #Allow aegir to restart tomcat6 without a password
 #@TODO: Is this OPTIONAL? If conifgured to autopull, no need to restart tomcat6

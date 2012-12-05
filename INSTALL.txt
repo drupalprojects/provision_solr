@@ -27,7 +27,7 @@ NOTE: You need sudo for execute this script
 
  3.- Copy the commands to drush folder
  ====================================
- Copy the folder provision/solr to drush folder
+ Copy the folder provision_solr to your drush folder (e.g. /var/aegir/.drush/)
 
  4.- Enable module
  =====================================
