@@ -46,6 +46,65 @@ function solr_provision_services() {
 }
 
 /**
+ * Implements hook_provision_apache_vhost_config()
+ * Adds the $_ENV['solr_url'] variable to the VHOST
+ */
+function solr_provision_apache_vhost_config($uri, $data) {
+  drush_log('Adding server variable for solr_url to vhost config.');
+
+  $host = $data['server']->remote_host;
+  $port = $data['server']->solr_port;
+  $path = "/" . $uri;
+
+  return array(
+    "SetEnv solr_host $host",
+    "SetEnv solr_port $port",
+    "SetEnv solr_path $path",
+  );
+}
+
+/**
+ * Append PHP code to Drupal's settings.php file.
+ * 
+ * @param $uri
+ *   URI for the site.
+ * @param $data
+ *   Associative array of data from provisionConfig_drupal_settings::data.
+ *
+ * @return
+ *   Lines to add to the site's settings.php file.
+ *
+ * @see provisionConfig_drupal_settings
+ */
+function solr_provision_drupal_config($uri, $data, $config = array()) {
+  $output =<<<php
+/**
+ * Solr Server Config
+ * We are mimicking aegir database settings here for Solr
+ */
+if (isset(\$_SERVER['solr_host'])) {
+
+  /**
+   * Implements hook_default_search_api_server_alter().
+   * This only works for search_api.
+   * 
+   * Yes, I am using system.module's good name to implement this hook.  
+   * How else can I define a hook in settings.php?  Would love suggestions.
+   */
+  function system_default_search_api_server_alter(array &\$defaults) {
+    if (isset(\$defaults['localhost'])){
+      \$defaults['localhost']->options['host'] = \$_SERVER['solr_host'];
+      \$defaults['localhost']->options['port'] = \$_SERVER['solr_port'];
+      \$defaults['localhost']->options['path'] = \$_SERVER['solr_path'];
+    }
+  }
+}
+php;
+
+  return $output;
+}
+
+/**
  * The service type base class.
  *
  * All implementations of the service type will inherit this class.
@@ -69,6 +128,9 @@ class provisionService_solr extends provisionService {
   function verify_site_cmd() {
     if ($this->server->solr_server) {
       $this->create_site_solr_core();
+
+      // @TODO: Try to wget the solr server.  If its not there this failed.
+
     }
   }
   /**
