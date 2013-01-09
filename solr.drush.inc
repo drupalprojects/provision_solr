@@ -12,19 +12,14 @@
 /**
  * Implements hook_drush_init()
  *
- * This is a horrible workaround for including provision.inc BEFORE our devshop_provision.context.project.inc file...
- *
- * I don't know what to do here to fix it, at the moment.
+ * Ensures provision.drush.inc and provision.service.inc are included before this file.
  */
-function sol_provision_drush_init(){
-  $path_to_provision = drush_get_option('path_to_provision_inc');
- $list = drush_commandfile_list();
- $provision_drush_inc = $list['provision'];
- include_once($provision_drush_inc);
+function solr_drush_init(){
+  $list = drush_commandfile_list();
+  $provision_drush_inc = $list['provision'];
+  include_once($provision_drush_inc);
  
-  $service_provision = str_replace('provision.inc', 'provision.service.inc', $provision_drush_inc);
-
-  include_once($path_to_provision);
+  $service_provision = str_replace('provision.drush.inc', 'provision.service.inc', $provision_drush_inc);
   include_once($service_provision);
 }
 
