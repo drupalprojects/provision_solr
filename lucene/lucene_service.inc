@@ -81,18 +81,6 @@ class provisionService_solr_lucene extends provisionService_solr {
     provision_file()->create_dir($solr_conf_path , dt("Solr folder configuration"), 0775);
     provision_file()->create_dir($tomcat6_conf_path , dt("Solr folder configuration"), 0775);
 
-    //Check if we have a path for a specific schema.xml and solrconfig.xml
-    if ($this->server->solr_path) {
-      $schema = $this->server->solr_path .'/schema.xml';
-      $solrconfig = $this->server->solr_path .'/solrconfig.xml';
-      if (provision_file()->exists($schema)->status()) {
-        provision_file()->copy($schema, $solr_conf_path .'/schema.xml');
-      }
-      if (provision_file()->exists($solrconfig)->status()) {
-        provision_file()->copy($solrconfig, $solr_conf_path .'/solrconfig.xml');
-      }
-    }
-
     //Sync data 
     $this->sync($solr_conf_path);
     $this->sync($tomcat6_conf_path);
@@ -149,6 +137,17 @@ class provisionService_solr_lucene extends provisionService_solr {
       return drush_set_error('DRUSH_CREATE_SOLR', dt('Problem creating !dest.', array('!dest' => $xml_config)));
     }
 
+    //Check if we have a path for a specific schema.xml and solrconfig.xml
+    if ($this->server->solr_path) {
+      if (provision_file()->exists($this->server->solr_path)->status()) {
+        $command = "cp -r $this->server->solr_path/* $home/";
+        $success = drush_shell_exec($command);
+        if (!$success) {
+          drush_log(dt('Problem for copy a custom config for solr'));
+        }
+      }
+    }
+
     //Change permissions
     provision_file()->chmod($home, 0777, TRUE);
 
@@ -160,9 +159,7 @@ class provisionService_solr_lucene extends provisionService_solr {
 
      //sync to remote server if is need
      $this->sync_site_conf($this->server->solr_conf_path, $remote_server['remote_host']);
-  //   drush_log(dt('Synced content for @dir', array('@dir' => $this->server->solr_conf_path)));
      $this->sync_site_conf($this->server->tomcat6_conf_path, $remote_server['remote_host']);
-  //   drush_log(dt('Synced content for @dir', array('@dir' => $this->server->tomcat6_conf_path)));
     }
 
     return TRUE;
