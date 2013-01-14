@@ -36,6 +36,7 @@ class provisionService_solr_lucene extends provisionService_solr {
 
 
     $this->server->solr_server = drush_get_option('solr_server', 0);
+    $this->server->solr_path = drush_get_option('solr_path', '');
     $reflect = new reflectionClass('provisionService_solr');
     _drush_sitealias_load_alias($this->server->solr_server);
     $all_site_aliases = drush_get_context('site-aliases');
@@ -78,9 +79,22 @@ class provisionService_solr_lucene extends provisionService_solr {
     $tomcat6_conf_path = "{$app_dir}tomcat6";
 
     provision_file()->create_dir($solr_conf_path , dt("Solr folder configuration"), 0775);
-    $this->sync($solr_conf_path);
-
     provision_file()->create_dir($tomcat6_conf_path , dt("Solr folder configuration"), 0775);
+
+    //Check if we have a path for a specific schema.xml and solrconfig.xml
+    if ($this->server->solr_path) {
+      $schema = $this->server->solr_path .'/schema.xml';
+      $solrconfig = $this->server->solr_path .'/solrconfig.xml';
+      if (provision_file()->exists($schema)->status()) {
+        provision_file()->copy($schema, $solr_conf_path .'/schema.xml');
+      }
+      if (provision_file()->exists($solrconfig)->status()) {
+        provision_file()->copy($solrconfig, $solr_conf_path .'/solrconfig.xml');
+      }
+    }
+
+    //Sync data 
+    $this->sync($solr_conf_path);
     $this->sync($tomcat6_conf_path);
   }
 
