@@ -35,7 +35,7 @@ class provisionService_solr_lucene extends provisionService_solr {
     parent::init_server();
 
 
-    $this->server->solr_server = drush_get_option('solr_server', 0);
+    $this->server->solr_server = drush_get_option('solr_server', '@server_master');
     $this->server->solr_path = drush_get_option('solr_path', '');
     $reflect = new reflectionClass('provisionService_solr');
     _drush_sitealias_load_alias($this->server->solr_server);
