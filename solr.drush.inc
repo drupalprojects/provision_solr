@@ -10,10 +10,11 @@
  */
 
 
-
+/**
  * Implements hook_drush_init()
  *
  * Ensures provision.drush.inc and provision.service.inc are included before this file.
+ */
 function solr_drush_init(){
   $list = drush_commandfile_list();
   $provision_drush_inc = $list['provision'];
