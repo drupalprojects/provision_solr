@@ -1,6 +1,24 @@
 <?php
 
 /**
+ * Expose the service type this extension defines to provision.
+ *
+ * Implementations are then conditionally loaded when the option 
+ * "--$service_service_type=$type" is passed to the provision-save
+ * command of a server.
+ *
+ * Implementations are automatically loaded from :
+ * provision/$service/$type/$type_service.inc.
+ *
+ * @return
+ *   An array with the service type the key, and the default implementation the value.
+ */
+function solr_provision_services() {
+  return array('solr' => 'lucene');
+}
+
+
+/**
  * The service type base class.
  *
  * All implementations of the service type will inherit this class.

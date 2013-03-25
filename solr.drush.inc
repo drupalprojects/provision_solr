@@ -19,26 +19,9 @@ function solr_drush_init(){
   $list = drush_commandfile_list();
   $provision_drush_inc = $list['provision'];
   include_once($provision_drush_inc);
- 
+  
   $service_provision = str_replace('provision.drush.inc', 'provision.service.inc', $provision_drush_inc);
   include_once($service_provision);
-}
-
-/**
- * Expose the service type this extension defines to provision.
- *
- * Implementations are then conditionally loaded when the option 
- * "--$service_service_type=$type" is passed to the provision-save
- * command of a server.
- *
- * Implementations are automatically loaded from :
- * provision/$service/$type/$type_service.inc.
- *
- * @return
- *   An array with the service type the key, and the default implementation the value.
- */
-function solr_provision_services() {
-  return array('solr' => 'lucene');
 }
 
 /**
