@@ -79,7 +79,7 @@ class provisionService_solr extends provisionService {
     }
     extract($creds);
 
-    $status = TRUE;
+    $status = FALSE;
     // create the solr core if its not yet here
     if(!$this->solr_core_exists($solr_core_name) || $force) {
       $status = $this->create_solr_core($solr_core_name);
