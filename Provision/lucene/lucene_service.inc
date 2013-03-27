@@ -45,7 +45,7 @@ class provisionService_solr_lucene extends provisionService_solr {
     $base_dir_solr = dirname($reflect->getFilename());
     $this->server->setProperty('lucene_search_server', 0);
     $this->server->solr_conf_path = "{$app_dir}solr";
-    $this->server->tomcat6_conf_path = "{$app_dir}tomcat6";
+    $this->server->tomcat6_conf_path = "{$app_dir}tomcat";
     $this->server->solr_default_home = "{$base_dir_solr}/lucene/default_data/solr";
     $this->server->solr_tpl = "{$base_dir_solr}/lucene/solr.tpl.php";
   }
@@ -76,7 +76,7 @@ class provisionService_solr_lucene extends provisionService_solr {
   function verify_server_cmd() {
     $app_dir = "{$this->server->config_path}/{$this->application_name}";
     $solr_conf_path = "{$app_dir}solr";
-    $tomcat6_conf_path = "{$app_dir}tomcat6";
+    $tomcat6_conf_path = "{$app_dir}tomcat";
 
     provision_file()->create_dir($solr_conf_path , dt("Solr folder configuration"), 0775);
     provision_file()->create_dir($tomcat6_conf_path , dt("Solr folder configuration"), 0775);
