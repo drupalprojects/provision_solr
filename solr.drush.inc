@@ -1,6 +1,8 @@
 <?php
 // $Id$
 
+require_once('Provision/solr_service.inc');
+
 /**
  * @file
  *   An solr of the provision service API.
@@ -9,6 +11,9 @@
  *  It matches the same service definition in the hosting front end.
  */
 
+function solr_provision_services() {
+  return array('solr' => 'lucene');
+}
 
 /**
  * Implements hook_drush_init()
