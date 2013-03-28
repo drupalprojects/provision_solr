@@ -1,7 +1,6 @@
 <?php
 // $Id$
 
-require_once('Provision/solr_service.inc');
 
 /**
  * @file
@@ -12,6 +11,7 @@ require_once('Provision/solr_service.inc');
  */
 
 function solr_provision_services() {
+  require_once('Provision/solr_service.inc');
   return array('solr' => 'lucene');
 }
 
