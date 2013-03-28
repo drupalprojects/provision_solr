@@ -11,9 +11,9 @@ class provisionService_solr extends provisionService {
   public $service = 'solr';
 
   static function subscribe_site($context) {
-    $context->setProperty('solr', drush_get_option('solr',0));
-    $context->setProperty('solr_core_name', drush_get_option('site_machine_name',NULL));
+    $context->setProperty('solr', drush_get_option('solr', 0));
     $context->setProperty('solr_server', drush_get_option('solr_server',0));
+    $context->setProperty('solr_config_path', drush_get_option('solr_config_path',0));
   }
 
   /**
@@ -22,12 +22,11 @@ class provisionService_solr extends provisionService {
    * @return v
    */
   function verify_site_cmd() {
-    if ($this->server->solr_server) {
+    if ($this->context->solr_server) {
+      drush_log('Site has solr_server.  Creating solr core...', 'ok');
       $this->create_site_solr_core();
-
       // @TODO: Try to wget the solr server.  If its not there this failed.
-
-    }
+    } 
   }
   /**
    * Find a viable solr_core name, based on the site's uri.
