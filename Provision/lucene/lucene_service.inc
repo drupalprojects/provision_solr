@@ -34,9 +34,9 @@ class provisionService_solr_lucene extends provisionService_solr {
   function init_server() {
     parent::init_server();
 
-
     $this->server->solr_server = drush_get_option('solr_server', '@server_master');
-    $this->server->solr_path = drush_get_option('solr_path', '');
+    $this->server->solr_path_to_war = drush_get_option('solr_path_to_war', "/usr/share/tomcat6/webapps/solr.war");
+    
     $reflect = new reflectionClass('provisionService_solr');
     _drush_sitealias_load_alias($this->server->solr_server);
     $all_site_aliases = drush_get_context('site-aliases');
@@ -120,36 +120,33 @@ class provisionService_solr_lucene extends provisionService_solr {
       return TRUE;
     }
 
-    //Copy a basic home solr
+    // Prep paths
     $home = $this->server->solr_conf_path .'/'. $solr_core_name;
+    $path_to_conf = $this->context->root .'/'. $this->context->solr_config_path;
+    
+    // Create the solr home dir (~/config/SERVER/solr/SITE)
     if (!provision_file()->exists($home)->status()) {
-      if (!drush_copy_dir($this->server->solr_default_home, $home)) {
-        return drush_set_error('DRUSH_CREATE_SOLR', dt('Problems for copy default home solr to !dest.', array('!dest' => $home)));
-      }
+      drush_mkdir($home);
     }
+    
+    // Copy site solr conf folder to SOLR_HOME/conf
+    drush_shell_exec("cp -rf $path_to_conf $home/conf");
 
+    // Create tomcat XML file
     $template = file_get_contents($this->server->solr_tpl);
     $xml_config = $this->server->tomcat6_conf_path .'/'. $solr_core_name .'.xml';
-    $data = array('home_directory' => $home);
+    $data = array(
+      'home_directory' => $home,
+      'path_to_solr_war' => $this->server->solr_path_to_war
+    );
     $status = provision_file()->file_put_contents($xml_config, $this->render_template($template, $data));
 
     if (!$status) {
       return drush_set_error('DRUSH_CREATE_SOLR', dt('Problem creating !dest.', array('!dest' => $xml_config)));
     }
 
-    //Check if we have a path for a specific schema.xml and solrconfig.xml
-    if ($this->server->solr_path) {
-      if (provision_file()->exists($this->server->solr_path)->status()) {
-        $command = "cp -r $this->server->solr_path/* $home/";
-        $success = drush_shell_exec($command);
-        if (!$success) {
-          drush_log(dt('Problem for copy a custom config for solr'));
-        }
-      }
-    }
-
     //Change permissions
-    provision_file()->chmod($home, 0777, TRUE);
+    //provision_file()->chmod($home, 0777, TRUE);
 
     //Sync if is different server_master
     if ($this->server->solr_server != '@server_master') {
