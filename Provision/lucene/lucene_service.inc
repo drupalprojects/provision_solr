@@ -1,12 +1,9 @@
 <?php
- // $Id$
 
-define ('CATALINA_HOME', '/etc/tomcat6/Catalina/localhost/');
-
- /**
-  * @file
-  *   A 'lucene' implementation of the 'solr' service type.
-  */
+/**
+ * @file
+ *   A 'lucene' implementation of the 'solr' service type.
+ */
 
 /**
  * A class containing the 'lucene' implementation of the 'solr' service.
@@ -37,7 +34,7 @@ class provisionService_solr_lucene extends provisionService_solr {
     $this->server->solr_server = drush_get_option('solr_server', '@server_master');
     
     // @TODO: This passes from hosting_solr.drush.inc, but only sometimes!!!
-    $this->server->solr_war_path = drush_get_option('solr_war_path', "/usr/share/solr.war");
+    $this->server->solr_war_path = drush_get_option('solr_war_path', "/usr/share/solr-3.6.2.war");
     
     $reflect = new reflectionClass('provisionService_solr');
     _drush_sitealias_load_alias($this->server->solr_server);
@@ -127,12 +124,9 @@ class provisionService_solr_lucene extends provisionService_solr {
     //Delete file configuration
     $home = $this->server->solr_conf_path .'/'. $solr_core_name;;
     $xml_config = $this->server->solr_conf_path .'/'. $solr_core_name .'.xml';
-    // @TODO
-    //$xml_symlink = CATALINA_HOME. $solr_core_name .'.xml';    
 
     provision_file()->rmdir($home);
     provision_file()->unlink($xml_config);
-    //provision_file()->unlink($xml_symlink);
   }
 
   function create_solr_core($solr_core_name) {
@@ -151,7 +145,7 @@ class provisionService_solr_lucene extends provisionService_solr {
     }
     
     // Copy site solr conf folder to SOLR_HOME/conf
-    drush_shell_exec("cp -rf $path_to_conf $home/conf");
+    drush_shell_exec("cp -rf $path_to_conf/* $home/conf");
 
     // Create tomcat XML file
     $template = file_get_contents($this->server->solr_tpl);
