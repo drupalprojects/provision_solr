@@ -33,9 +33,11 @@ class provisionService_solr_lucene extends provisionService_solr {
 
   function init_server() {
     parent::init_server();
-
+    
     $this->server->solr_server = drush_get_option('solr_server', '@server_master');
-    $this->server->solr_path_to_war = drush_get_option('solr_path_to_war', "/usr/share/tomcat6/webapps/solr.war");
+    
+    // @TODO: This passes from hosting_solr.drush.inc, but only sometimes!!!
+    $this->server->solr_war_path = drush_get_option('solr_war_path', "/usr/share/solr.war");
     
     $reflect = new reflectionClass('provisionService_solr');
     _drush_sitealias_load_alias($this->server->solr_server);
@@ -57,6 +59,7 @@ class provisionService_solr_lucene extends provisionService_solr {
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
     $data['solr_conf_path'] = $this->server->solr_conf_path;
+    $data['solr_war_path'] = $this->server->solr_war_path;
     $data['solr_default_home'] = $this->server->solr_default_home;
     $data['tomcat6_conf_path'] = $this->server->tomcat6_conf_path;
   }
@@ -78,8 +81,25 @@ class provisionService_solr_lucene extends provisionService_solr {
     $solr_conf_path = "{$app_dir}solr";
     $tomcat6_conf_path = "{$app_dir}tomcat";
 
+    // create ~/config/SERVER/solr/ and ~/config/SERVER/tomcat
     provision_file()->create_dir($solr_conf_path , dt("Solr folder configuration"), 0775);
     provision_file()->create_dir($tomcat6_conf_path , dt("Solr folder configuration"), 0775);
+    
+    // symlink ~/config/tomcat to ~/config/SERVER/tomcat
+    $Link_path = $this->server->aegir_root . '/config/' . $file;
+    $this->server->shell_exec("rm $Link_path");
+    $file = 'tomcat';
+    $cmd = sprintf('ln -sf %s %s', 
+      escapeshellarg($this->server->config_path . '/' . $file . '/'), 
+      escapeshellarg($this->server->aegir_root . '/config/' . $file)
+    );
+    if ($this->server->shell_exec($cmd)) {
+      drush_log(dt("Created symlink for %file to %dest on %server", array(
+        '%file' => $this->server->config_path . '/' . $file,
+        '%dest' => $this->server->aegir_root . '/config/' . $file,
+        '%server' => $this->server->remote_host,
+      )));  
+    };
 
     //Sync data 
     $this->sync($solr_conf_path);
@@ -107,11 +127,12 @@ class provisionService_solr_lucene extends provisionService_solr {
     //Delete file configuration
     $home = $this->server->solr_conf_path .'/'. $solr_core_name;;
     $xml_config = $this->server->solr_conf_path .'/'. $solr_core_name .'.xml';
-    $xml_symlink = CATALINA_HOME. $solr_core_name .'.xml';    
+    // @TODO
+    //$xml_symlink = CATALINA_HOME. $solr_core_name .'.xml';    
 
     provision_file()->rmdir($home);
     provision_file()->unlink($xml_config);
-    provision_file()->unlink($xml_symlink);
+    //provision_file()->unlink($xml_symlink);
   }
 
   function create_solr_core($solr_core_name) {
@@ -137,8 +158,9 @@ class provisionService_solr_lucene extends provisionService_solr {
     $xml_config = $this->server->tomcat6_conf_path .'/'. $solr_core_name .'.xml';
     $data = array(
       'home_directory' => $home,
-      'path_to_solr_war' => $this->server->solr_path_to_war
+      'solr_war_path' => $this->server->solr_war_path
     );
+    
     $status = provision_file()->file_put_contents($xml_config, $this->render_template($template, $data));
 
     if (!$status) {
