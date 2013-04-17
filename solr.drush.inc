@@ -1,24 +1,30 @@
 <?php
-// $Id$
-
+/**
+ * @file solr.drush.inc
+ *
+ * Provides the "solr" service type to AEgir.
+ *
+ * This file only cares about the SOLR side of things.  Regardless of implementation,
+ * Solr needs its SOLR_HOME, conf and data directories, so this file handles that part.
+ *
+ */
 
 /**
- * @file
- *   An solr of the provision service API.
- *
+ * Implements hook_provision_services()
+ * 
  *  Declares a new service type and a basic implementation of it.
  *  It matches the same service definition in the hosting front end.
  */
-
 function solr_provision_services() {
-  require_once('Provision/solr_service.inc');
-  return array('solr' => 'lucene');
+  require_once('solr.service.inc');
+  return array('solr' => NULL);
 }
 
 /**
  * Implements hook_drush_init()
  *
- * Ensures provision.drush.inc and provision.service.inc are included before this file.
+ * Ensures provision.drush.inc and provision.service.inc are included
+ * before this file.
  */
 function solr_drush_init(){
   $list = drush_commandfile_list();
@@ -58,6 +64,9 @@ function solr_provision_apache_vhost_config($uri, $data) {
  * @return
  *   Lines to add to the site's settings.php file.
  *
+ *   @TODO: THIS IS FORCED UPON USERS at the moment.... we should detect if
+ *   the site is using apachesolr or searchapi!
+ *
  * @see provisionConfig_drupal_settings
  */
 function solr_provision_drupal_config($uri, $data, $config = array()) {
@@ -87,3 +96,4 @@ php;
 
   return $output;
 }
+
