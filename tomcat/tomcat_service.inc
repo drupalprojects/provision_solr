@@ -40,10 +40,6 @@ class provisionService_solr_tomcat extends provisionService_solr_public {
 
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
-    $data['solr_conf_path'] = $this->server->solr_conf_path;
-    $data['solr_war_path'] = $this->server->solr_war_path;
-    $data['solr_default_home'] = $this->server->solr_default_home;
-    $data['tomcat6_conf_path'] = $this->server->tomcat6_conf_path;
   }
   
   /**
