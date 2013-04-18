@@ -35,38 +35,38 @@ class provisionConfig_solr extends provisionConfig {
  * server.
  */
 class provisionConfig_solr_server extends provisionConfig_solr {
-  public $template = 'server.tpl.php';
   public $description = 'Link to app localhost folder.';
 
   function write() {
-    parent::write();
     
     // $file is tomcat or jetty
     if (isset($this->context->solr_service_type)) {
-      $file = $this->context->solr_service_type;
+      $filename = $this->filename();
       // We link the app_name file on the remote server to the right version.
       $cmd = sprintf('ln -sf %s %s', 
-        escapeshellarg($this->context->config_path . '/' . $file), 
+        escapeshellarg($filename), 
         escapeshellarg($this->context->aegir_root . '/config/')
       );
       
       if ($this->context->shell_exec($cmd)) {
         drush_log(dt("Created symlink for %file on %server", array(
-          '%file' => $file,
+          '%file' => $filename,
           '%server' => $this->context->remote_host,
         )));  
        
       };
     }
+    parent::write();
   }
   
   /**
-   * Generates a foldername for solr service implementation (tomcat, jetty, etc.)
+   * Returns the path to the service implementation config folder.
    */
   function filename() {
     if (isset($this->context->solr_service_type)) {
-      $file = $this->context->solr_service_type;
-      return $this->context->config_path . '/' . $file;
+      $filename = $this->context->config_path . '/' .$this->context->solr_service_type;
+      drush_log("filename = $filename");
+      return $filename;
     }
     else {
       return '';
@@ -82,18 +82,17 @@ class provisionConfig_solr_site extends provisionConfig_solr {
   public $description = 'Tomcat webapp configuration file';
 
   function filename() {
-    return $this->context->solr_homes_path . '/' . $this->uri;
+    $filename = $this->server->solr_homes_path . '/' . $this->uri;
+    drush_log("filename = $filename");
+    return $filename;
   }
 
   function write() {
     // Creates solr_home directory and application xml file
     parent::write();
     
-    drush_log('CALLING: provisionConfig_solr_server::write()', 'warning');
-    drush_log(print_r($this, 1));
-     
     // Prep paths
-    $solr_home = $this->server->config_path .'/solr/'. $this->context->uri;
+    $solr_home = $this->filename();
     $path_to_drupal_conf = $this->context->root .'/'. $this->context->solr_config_path;
     $path_to_default_conf = __DIR__ . '/solr';
     
@@ -116,7 +115,8 @@ class provisionConfig_solr_site extends provisionConfig_solr {
       
     // Now copy this site's config over that.
     drush_log(dt('Copying files in %drupal to SOLR_HOME at %home', $t));
-    // @TODO: Gotta fix path_to_drupal_conf
+    // @TODO: Gotta fix path_to_drupal_conf, has to load from hostmaster, until
+    // we figure out how to save it in the site.
     //drush_shell_exec("cp -rf $path_to_drupal_conf/* $solr_home/conf");
   }
 
