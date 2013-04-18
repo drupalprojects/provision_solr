@@ -53,7 +53,7 @@ class provisionService_solr_public extends provisionService_solr {
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
     if (!is_null($this->application_name)) {
-      $data['solr_app_path'] = $this->server->solr_homes_path;
+      $data['solr_app_path'] = $this->server->solr_app_path;
       $data['solr_homes_path'] = $this->server->solr_homes_path;
       $data['solr_war_path'] = $this->server->solr_war_path;
     }
