@@ -135,6 +135,7 @@ class provisionConfig_solr_site extends provisionConfig_solr {
       'solr_war_path' => $this->server->solr_war_path
     );
     
+    // @TODO WTF?!?  It's writing an empty file 
     $status = provision_file()->file_put_contents($path_to_solr_server_config,$this->render_template($template, $data));
 
     drush_log("SAVING TO: $path_to_solr_server_config " . $template, "ok");
