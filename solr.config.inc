@@ -4,6 +4,15 @@
  *    Configuration classes for the SOLR service.
  */
 
+ /**
+  *
+  * @TODO:  For some reason, $this->data is never set.
+  *
+  * I cannot figure out where it is supposed to happen.
+  * This might be the cause of the inability to use the templating system
+  * properly, and other weird quirks.
+  */
+
 
 /**
  * Base class for Solr config files.
@@ -79,23 +88,29 @@ class provisionConfig_solr_server extends provisionConfig_solr {
  * Base class for virtual host configuration files.
  */
 class provisionConfig_solr_site extends provisionConfig_solr {
-  public $template = 'site.tpl.php';
+  
+  // @TODO: REMOVE HACK!  For some reason, provisionConfig_tomcat_site isn't used.
+  public $template = 'tomcat/site.tpl.php';
   public $description = 'Tomcat webapp configuration file';
-
+  
+  // Needs to return the filename of the template file?
   function filename() {
-    $filename = $this->server->solr_homes_path . '/' . $this->uri;
+    $filename = $this->server->solr_app_path . '/' . $this->uri . '.xml';
     drush_log("filename = $filename");
     return $filename;
   }
 
   function write() {
-    // Creates solr_home directory and application xml file
     
+    // Writes tomcat xml file.
+    parent::write();
+
+    // Creates solr_home directory and application xml file
     // Prep paths
-    $solr_home = $this->filename();
+    $solr_home = $this->server->solr_homes_path . '/' . $this->uri;
     
     // CONTEXT is from the server node in hostmaster
-    $path_to_drupal_conf = $this->context->root .'/'. $this->context->solr_config_path;
+    $path_to_drupal_conf = $this->context->root .'/'. $this->solr_config_path;
     $path_to_default_conf = __DIR__ . '/solr';
     
     // Save some translation strings for messages.
@@ -121,28 +136,26 @@ class provisionConfig_solr_site extends provisionConfig_solr {
     // we figure out how to save it in the site.
     //drush_shell_exec("cp -rf $path_to_drupal_conf/* $solr_home/conf");
     
-    parent::write();
-
-    //// @TODO: This was supposed to be automatic, i thought.  http.config.inc
-    // Now save our server file
-    // doesn't do this...
-    $path_to_solr_server_config = $this->server->solr_app_path . '/' . $this->uri . '.xml';
-    $path_to_template = __DIR__ . '/' . $this->server->solr_service_type . '/' . $this->template;
-    
-    $template = file_get_contents($path_to_template);
-    $data = array(
-      'solr_home_path' => $solr_home,
-      'solr_war_path' => $this->solr_server->solr_war_path
-    );
-    $contents = $this->render_template($template, $data);
-    
-    // @TODO WTF?!?  It's writing an empty file 
-    $status = provision_file()->file_put_contents($path_to_solr_server_config, $contents);
-    
-    drush_log("SAVING TO: $path_to_solr_server_config " . $contents, "ok");
-    if (!$status) {
-      return drush_set_error('DRUSH_CREATE_SOLR', dt('Problem creating !dest.', array('!dest' => $xml_config)));
-    }
+    ////// @TODO: This was supposed to be automatic, i thought.  http.config.inc
+    //// Now save our server file
+    //// doesn't do this...
+    //$path_to_solr_server_config = $this->server->solr_app_path . '/' . $this->uri . '.xml';
+    //$path_to_template = __DIR__ . '/' . $this->server->solr_service_type . '/' . $this->template;
+    //
+    //$template = file_get_contents($path_to_template);
+    //$data = array(
+    //  'solr_home_path' => $solr_home,
+    //  'solr_war_path' => $this->solr_server->solr_war_path
+    //);
+    //$contents = $this->render_template($template, $data);
+    //
+    //// @TODO WTF?!?  It's writing an empty file 
+    //$status = provision_file()->file_put_contents($path_to_solr_server_config, $contents);
+    //
+    //drush_log("SAVING TO: $path_to_solr_server_config " . $contents, "ok");
+    //if (!$status) {
+    //  return drush_set_error('DRUSH_CREATE_SOLR', dt('Problem creating !dest.', array('!dest' => $xml_config)));
+    //}
   }
 
   function unlink() {
