@@ -46,10 +46,10 @@ class provisionConfig_solr extends provisionConfig {
 class provisionConfig_solr_server extends provisionConfig_solr {
   public $template = '';
   public $description = 'Link to app localhost folder.';
-
+  
   function write() {
     
-    // $file is tomcat or jetty
+    // Symlink to application directory to the correct server config folder
     if (isset($this->data['application_name'])) {
       $filename = $this->filename();
       // We link the app_name file on the remote server to the right version.
@@ -57,13 +57,11 @@ class provisionConfig_solr_server extends provisionConfig_solr {
         escapeshellarg($filename), 
         escapeshellarg($this->data['server']->aegir_root . '/config/')
       );
-      
       if ($this->data['server']->shell_exec($cmd)) {
         drush_log(dt("Created symlink for %file on %server", array(
           '%file' => $filename,
           '%server' => $this->data['server']->remote_host,
         )));  
-       
       };
     }
     parent::write();
