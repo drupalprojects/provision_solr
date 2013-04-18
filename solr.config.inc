@@ -90,7 +90,7 @@ class provisionConfig_solr_server extends provisionConfig_solr {
 class provisionConfig_solr_site extends provisionConfig_solr {
   
   // @TODO: REMOVE HACK!  For some reason, provisionConfig_tomcat_site isn't used.
-  public $template = 'tomcat/site.tpl.php';
+  public $template = 'site.tpl.php';
   public $description = 'Tomcat webapp configuration file';
   
   // Needs to return the filename of the template file?
