@@ -41,8 +41,6 @@ class provisionConfig_solr_server extends provisionConfig_solr {
   function write() {
     parent::write();
     
-    drush_log('CALLING: provisionConfig_solr_server::write()', 'warning');
-    
     // $file is tomcat or jetty
     if (isset($this->context->solr_service_type)) {
       $file = $this->context->solr_service_type;
@@ -92,8 +90,34 @@ class provisionConfig_solr_site extends provisionConfig_solr {
     parent::write();
     
     drush_log('CALLING: provisionConfig_solr_server::write()', 'warning');
-
+    drush_log(print_r($this, 1));
+     
+    // Prep paths
+    $solr_home = $this->server->config_path .'/solr/'. $this->context->uri;
+    $path_to_drupal_conf = $this->context->root .'/'. $this->context->solr_config_path;
+    $path_to_default_conf = __DIR__ . '/solr';
     
+    // Save some translation strings for messages.
+    $t = array();
+    $t['%home'] = $solr_home;
+    $t['%default'] = $path_to_default_conf;
+    $t['%drupal'] = $path_to_drupal_conf;
+    
+    // Create the solr home dir if its not there yet. (~/config/SERVER/solr/SITE)
+    if (!provision_file()->exists($solr_home)->status()) {
+      drush_mkdir($solr_home);
+      drush_mkdir($solr_home . '/conf');
+      drush_log(dt('Created a new SOLR_HOME at %home', $t));
+    }
+    
+    // Copy the config files in.
+    drush_log(dt('Copying files in %default/conf to SOLR_HOME at %home', $t));
+    drush_shell_exec("cp -rf $path_to_default_conf/conf/* $solr_home/conf");
+      
+    // Now copy this site's config over that.
+    drush_log(dt('Copying files in %drupal to SOLR_HOME at %home', $t));
+    // @TODO: Gotta fix path_to_drupal_conf
+    //drush_shell_exec("cp -rf $path_to_drupal_conf/* $solr_home/conf");
   }
 
   function unlink() {
