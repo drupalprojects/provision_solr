@@ -3,7 +3,8 @@ Hosting Solr
 
 Provides a Solr service with a Tomcat implementation for the Aegir Hosting system.
 
-Create a server and enable Solr.  Then create a site and enter the path to Solr config
+Create a server node and enable Solr.  Check that the Restart Command is correct
+for your system.  Then create a site node and enter the path to Solr config
 files for that site's solr instance.
 
 Requirements
