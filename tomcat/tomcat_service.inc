@@ -73,6 +73,8 @@ class provisionService_solr_tomcat extends provisionService_solr_public {
  * Apache server level configuration file class
  */
 class provisionConfig_tomcat_server extends provisionConfig_solr_server {
+  protected $mode = 0755;
+
   function process() {
     parent::process();
   }
