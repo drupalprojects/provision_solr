@@ -75,8 +75,13 @@ class provisionService_solr_tomcat extends provisionService_solr_public {
 class provisionConfig_tomcat_server extends provisionConfig_solr_server {
   function process() {
     parent::process();
-    //$this->data['extra_config'] = "# Extra configuration from modules:\n";
-    //$this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_server_config', $this->data));
+  }
+  
+  function write() {
+    parent::write();
+    
+    // Ensure chmod of the folder
+    provision_file()->chmod($this->filename(), $this->mode);
   }
 }
 
