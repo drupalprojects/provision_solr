@@ -93,6 +93,8 @@ class provisionConfig_solr_site extends provisionConfig_solr {
     
     // Prep paths
     $solr_home = $this->filename();
+    
+    // CONTEXT is from the server node in hostmaster
     $path_to_drupal_conf = $this->context->root .'/'. $this->context->solr_config_path;
     $path_to_default_conf = __DIR__ . '/solr';
     
@@ -101,6 +103,7 @@ class provisionConfig_solr_site extends provisionConfig_solr {
     $t['%home'] = $solr_home;
     $t['%default'] = $path_to_default_conf;
     $t['%drupal'] = $path_to_drupal_conf;
+    $t['%server'] = $path_to_solr_server_config;
     
     // Create the solr home dir if its not there yet. (~/config/SERVER/solr/SITE)
     if (!provision_file()->exists($solr_home)->status()) {
@@ -118,6 +121,26 @@ class provisionConfig_solr_site extends provisionConfig_solr {
     // @TODO: Gotta fix path_to_drupal_conf, has to load from hostmaster, until
     // we figure out how to save it in the site.
     //drush_shell_exec("cp -rf $path_to_drupal_conf/* $solr_home/conf");
+    
+    
+    // Now save our server file
+    // @TODO: This was supposed to be automatic, i thought.  http.config.inc
+    // doesn't do this...
+    $path_to_solr_server_config = $this->server->solr_app_path . '/' . $this->uri . '.xml';
+    $path_to_template = __DIR__ . '/' . $this->server->solr_service_type . '/' . $this->template;
+
+    $template = file_get_contents($path_to_template);
+    $data = array(
+      'solr_home_path' => $solr_home,
+      'solr_war_path' => $this->server->solr_war_path
+    );
+    
+    $status = provision_file()->file_put_contents($path_to_solr_server_config,$this->render_template($template, $data));
+
+    drush_log("SAVING TO: $path_to_solr_server_config " . $template, "ok");
+    if (!$status) {
+      return drush_set_error('DRUSH_CREATE_SOLR', dt('Problem creating !dest.', array('!dest' => $xml_config)));
+    }
   }
 
   function unlink() {
@@ -126,5 +149,19 @@ class provisionConfig_solr_site extends provisionConfig_solr {
 
   function process() {
     parent::process();
+  }
+  
+  /**
+   * @TODO: This shouldn't be needed for us too, right?
+   */
+  function render_template($template, $variables) {
+    drush_errors_off();
+    extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
+    ob_start();                      // Start output buffering
+    eval('>'. $template);                 // Generate content
+    $contents = ob_get_contents();   // Get the contents of the buffer
+    ob_end_clean();                  // End buffering and discard
+    drush_errors_on();
+    return $contents;                // Return the contents
   }
 }
