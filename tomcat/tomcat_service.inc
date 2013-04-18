@@ -82,7 +82,7 @@ class provisionConfig_tomcat_server extends provisionConfig_solr_server {
   function write() {
     parent::write();
     
-    // Ensure chmod of the folder
+    // Ensure chmod of the tomcat folder
     provision_file()->chmod($this->filename(), $this->mode);
   }
 }

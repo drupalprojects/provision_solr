@@ -129,6 +129,9 @@ class provisionConfig_solr_site extends provisionConfig_solr {
     // Now copy this site's config over that.
     drush_log(dt('Copying files in %drupal to SOLR_HOME at %home', $t), 'ok');
     drush_shell_exec("cp -rf $path_to_drupal_conf/* $solr_home/conf");
+    
+    // Ensure chmod of the solr home folders.
+    provision_file()->chmod($this->data['server']->solr_homes_path, 0775);
   }
 
   function unlink() {
