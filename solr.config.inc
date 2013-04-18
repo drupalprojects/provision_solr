@@ -41,19 +41,21 @@ class provisionConfig_solr_server extends provisionConfig_solr {
   function write() {
     parent::write();
     
+    drush_log('CALLING: provisionConfig_solr_server::write()', 'warning');
+    
     // $file is tomcat or jetty
-    if (isset($this->data['application_name'])) {
-      $file = $this->data['application_name'];
+    if (isset($this->context->solr_service_type)) {
+      $file = $this->context->solr_service_type;
       // We link the app_name file on the remote server to the right version.
       $cmd = sprintf('ln -sf %s %s', 
-        escapeshellarg($this->data['server']->config_path . '/' . $file), 
-        escapeshellarg($this->data['server']->aegir_root . '/config/' . $file)
+        escapeshellarg($this->context->config_path . '/' . $file), 
+        escapeshellarg($this->context->aegir_root . '/config/')
       );
       
-      if ($this->data['server']->shell_exec($cmd)) {
+      if ($this->context->shell_exec($cmd)) {
         drush_log(dt("Created symlink for %file on %server", array(
           '%file' => $file,
-          '%server' => $this->data['server']->remote_host,
+          '%server' => $this->context->remote_host,
         )));  
        
       };
@@ -82,12 +84,15 @@ class provisionConfig_solr_site extends provisionConfig_solr {
   public $description = 'Tomcat webapp configuration file';
 
   function filename() {
-    return $this->data['solr_homes_path'] . '/' . $this->uri;
+    return $this->context->solr_homes_path . '/' . $this->uri;
   }
 
   function write() {
-    // Creates solr_homes_path (i think?)
+    // Creates solr_home directory and application xml file
     parent::write();
+    
+    drush_log('CALLING: provisionConfig_solr_server::write()', 'warning');
+
     
   }
 
