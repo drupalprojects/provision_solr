@@ -102,38 +102,6 @@ class provisionService_solr_public extends provisionService_solr {
   
   function verify_site_cmd() {
     parent::verify_site_cmd();
-    //
-    //// Create a SOLR_HOME for this site.
-    //if (!is_null($this->application_name)) {
-    //  
-    //  // Create tomcat XML file
-    //  $template = file_get_contents($this->server->solr_tpl);
-    //  $xml_config = $this->server->tomcat6_conf_path .'/'. $solr_core_name .'.xml';
-    //  $data = array(
-    //    'home_directory' => $home,
-    //    'solr_war_path' => $this->server->solr_war_path
-    //  );
-    //  
-    //  $status = provision_file()->file_put_contents($xml_config, $this->render_template($template, $data));
-    //  
-    //  if (!$status) {
-    //    return drush_set_error('DRUSH_CREATE_SOLR', dt('Problem creating !dest.', array('!dest' => $xml_config)));
-    //  }
-    //  
-    //  //Change permissions
-    //  //provision_file()->chmod($home, 0777, TRUE);
-    //  
-    //  //Sync if is different server_master
-    //  if ($this->server->solr_server != '@server_master') {
-    //    _drush_sitealias_load_alias($this->server->solr_server);
-    //    $all_site_aliases = drush_get_context('site-aliases');
-    //    $remote_server = $all_site_aliases[$this->server->solr_server];
-    //  
-    //   //sync to remote server if is need
-    //   $this->sync_site_conf($this->server->solr_conf_path, $remote_server['remote_host']);
-    //   $this->sync_site_conf($this->server->tomcat6_conf_path, $remote_server['remote_host']);
-    //  }
-    
   }
   
 
