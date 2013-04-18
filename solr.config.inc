@@ -122,11 +122,14 @@ class provisionConfig_solr_site extends provisionConfig_solr {
     }
     
     // Copy the config files in.
-    drush_log(dt('Copying files in %default/conf to SOLR_HOME at %home', $t));
+    drush_log(dt('Copying %default/solr.xml to SOLR_HOME', $t), 'ok');
+    drush_shell_exec("cp -rf $path_to_default_conf/solr.xml $solr_home");
+
+    drush_log(dt('Copying files in %default/conf to SOLR_HOME at %home', $t), 'ok');
     drush_shell_exec("cp -rf $path_to_default_conf/conf/* $solr_home/conf");
       
     // Now copy this site's config over that.
-    drush_log(dt('Copying files in %drupal to SOLR_HOME at %home', $t));
+    drush_log(dt('Copying files in %drupal to SOLR_HOME at %home', $t), 'ok');
     drush_shell_exec("cp -rf $path_to_drupal_conf/* $solr_home/conf");
   }
 
