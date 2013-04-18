@@ -33,13 +33,14 @@ class provisionService_solr_tomcat extends provisionService_solr_public {
   }
 
   function init_server() {
+    $this->configs['server'][] = 'provisionConfig_tomcat_server';
+    $this->configs['site'][] = 'provisionConfig_tomcat_site';
     parent::init_server();
-    $this->configs['server'][] = 'provisionConfig_solr_server';
-    $this->configs['site'][] = 'provisionConfig_solr_site';
   }
 
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
+    return $data;
   }
   
   /**
