@@ -35,6 +35,7 @@ class provisionService_solr extends provisionService {
    */
   static function subscribe_site($context) {
     $context->setProperty('solr_server', '@server_master');
+    $context->setProperty('solr_config_path', '');
     $context->is_oid('solr_server');
     $context->service_subscribe('solr', $context->solr_server->name);
   }
@@ -71,7 +72,9 @@ class provisionService_solr_public extends provisionService_solr {
     // application_name is tomcat, jetty, etc
     if (!is_null($this->application_name)) {
       $this->server->solr_app_path = "{$this->server->config_path}/{$this->application_name}";
-      $this->server->solr_war_path = drush_get_option('solr_war_path', '/usr/share/solr.war');
+      
+      // @TODO: How to get this from hosting-task?
+      $this->server->solr_war_path = drush_get_option('solr_war_path', '/usr/share/solr-3.6.2.war');
       $this->server->solr_homes_path = "{$this->server->config_path}/solr";
     }
   }
