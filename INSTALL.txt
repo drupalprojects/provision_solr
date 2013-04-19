@@ -1,39 +1,88 @@
- Guide of installation on linux
+Aegir Apache Solr
+=================
 
- 1. Install tomcat6
- ==============================
- Execute install.sh (You need execute with sudo)
- For local aegir server: ./install.sh
- For remote server: ./install.sh path_to_conf_server
+Installation
+------------
 
-Example remote server: ./install.sh /var/aegir/config/server_thinkdrop
+You will need Aegir, a solr.war file, and Tomcat to use this tool.
 
-NOTE: You need sudo for execute this script
+### Aegir + Provision Solr
 
- 2.- Configure tomcat6
- ==============================
- Now is need add two user for use tomcat. Is need edit the file /etc/tomcat6/tomcat-users.xml. One example is:
- <tomcat-users>
-   <role rolemane="admin"/>
-   <role rolename="tomcat"/>
-   <role rolename="manager"/>
-   <role rolename="manager-gui"/>
-   <role rolename="manager-script"/>
-   <user username="tomcat" password="s3cret" roles="manager-gui,admin,manager"/>
-   <user username="normal_user" password="normal_user" roles="manager-script"/>
- </tomcat-users>
+We assume you have setup Aegir, but if not head to
+http://community.aegirproject.org/installing. I really recommend going through
+the Manual Installation. It is not as hard as it sounds, and you will learn the
+components of Aegir. Take the Plunge!
 
- NOTE: When we change this file is need reload tomcat with /etc/init.d/tomcat6 restart
+Once you've got aegir installed, get the Provision Solr drush project:
 
- 3.- Copy the commands to drush folder
- ====================================
- Copy the folder provision_solr to your drush folder (e.g. /var/aegir/.drush/)
+    drush dl provision_solr
 
- 4.- Enable module
- =====================================
- Go to admin/build/modules for enable module and on the sites node you can see one check for provide solr server. If you enable this checkbox in the page node you can see the information for configure solr in your drupal.
+### Solr
 
+Next, get Apache Solr itself. Get a solr.war file from somewhere! You can
+download the entire apachesolr tar.gz from Apache at
+https://www.apache.org/dyn/closer.cgi/lucene/solr/.
 
-Troubleshooting
-=====================================
-1.- If you try to run drush @hostmaster hosting-tasks immediately, it may fail since in your session, your groups may not take hold. so log out and back in to make sure you have the right group.
+All you need on your server is the solr.war file. Extract that folder someplace
+temporary and get the solr.war file, located at
+apache-solr-VERSION/example/webapps/solr.war.
+
+Put this file on your server somewhere like /usr/share/solr-VERSION.war. We
+recommend naming it with the version number, because each Aegir Server Entity
+can utilize a specific WAR file. It doesn't matter where you put this file, as
+long as you configure your server to point solr_war_path to that location.
+
+Then, setup one of your Provision Server Entities (aka contexts, aka drush
+aliases) with the Solr info:
+
+    'solr_port' => '8080',
+    'solr_restart_cmd' => 'sudo /etc/init.d/tomcat7 restart',
+    'solr_app_path' => '/var/aegir/config/server_master/tomcat',
+    'solr_war_path' => '/usr/share/solr-3.6.2.war',
+    'solr_homes_path' => '/var/aegir/config/server_master/solr',
+
+### Tomcat
+
+Next, you need Tomcat. No other Solr server has been built as of yet, but
+provision_solr is ready for it.
+
+The following instructions have been thoroughly tested on ubuntu 12.04 LTS, but
+tomcat is straightforward enough you should be able to adapt these instructions
+to any system.
+
+Install Tomcat7. It doesn't require anything else be installed first.
+
+    sudo apt-get install tomcat7
+
+Delete /etc/tomcat7/Catalina/localhost and replace with a symlink to
+/var/aegir/config/tomcat:
+
+    sudo rm -rf /etc/tomcat7/Catalina/localhost && ln -s /var/aegir/config/tomcat /etc/tomcat7/Catalina/localhost
+
+This must happen pretty fast, as Tomcat usually replaces the Catalina/localhost
+folder as soon as you delete it.
+
+Aegir will now be able to write new Tomcat XML application files on the fly when
+you create new Aegir Sites.
+
+### sudo
+
+The aegir user needs to be able to restart Tomcat without a password. If you
+have already installed Aegir this was done for the Apache restart command.
+
+Read the instructions in the Manual Installation Handbook on sudo config. In
+most Non-centos linux systems, you have a file at /etc/sudoers.d/aegir. Add this
+line to that file:
+
+    aegir ALL=NOPASSWD: /etc/init.d/tomcat7
+
+### Front End: Hosting Solr
+
+This module is much easier to use with the AEgir Hosting front-end companion,
+Hosting Solr.
+
+You can easily download and install hosting_solr with the following drush
+commands:
+
+    drush @hostmaster dl hosting_solr
+    drush @hostmaster en hosting_solr

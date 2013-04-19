@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+#  THIS SCRIPT IS PROVIDED AS AN EXAMPLE ONLY.
+#  
+#  IT MAY NOT WORK AS ADVERTISED.
+#
+# See INSTALL.txt for manual installation instructions.
+#
 
 SOLR_HOME=/etc/tomcat6/Catalina/localhost
 AEGIR_HOME=/var/aegir
