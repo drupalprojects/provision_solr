@@ -65,6 +65,12 @@ folder as soon as you delete it.
 Aegir will now be able to write new Tomcat XML application files on the fly when
 you create new Aegir Sites.
 
+As a last step, you must add the Tomcat user to the Aegir group:
+
+    sudo adduser tomcat7 aegir
+
+This is so tomcat7 can read and write certain folders owned by Aegir.
+
 ### sudo
 
 The aegir user needs to be able to restart Tomcat without a password. If you
