@@ -16,8 +16,8 @@
  *  It matches the same service definition in the hosting front end.
  */
 function solr_provision_services() {
-  require_once('solr.service.inc');
-  return array('solr' => NULL);
+//  require_once('solr.service.inc');
+//  return array('solr' => NULL);
 }
 
 /**
@@ -27,12 +27,12 @@ function solr_provision_services() {
  * before this file.
  */
 function solr_drush_init(){
-  $list = drush_commandfile_list();
-  $provision_drush_inc = $list['provision'];
-  include_once($provision_drush_inc);
-  
-  $service_provision = str_replace('provision.drush.inc', 'provision.service.inc', $provision_drush_inc);
-  include_once($service_provision);
+//  $list = drush_commandfile_list();
+//  $provision_drush_inc = $list['provision'];
+//  include_once($provision_drush_inc);
+//
+//  $service_provision = str_replace('provision.drush.inc', 'provision.service.inc', $provision_drush_inc);
+//  include_once($service_provision);
 }
 
 /**

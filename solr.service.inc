@@ -2,7 +2,8 @@
 
 // Ripped off from http.drush.inc
 
-// Base solr service class. 
+// Base solr service class.
+
 class provisionService_solr extends provisionService {
   public $service = 'solr';
 
