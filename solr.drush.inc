@@ -11,11 +11,10 @@
 
 /**
  * Implements hook_drush_init()
- *
- * Ensures provision.drush.inc and provision.service.inc are included
- * before this file.
  */
 function solr_drush_init(){
+  // @TODO: This is failing.  Provision is trying to load the Solr service before this ever gets called.
+  drush_log('loading solr_drush_init', 'ok');
   solr_provision_register_autoload();
 }
 
@@ -30,16 +29,18 @@ function solr_provision_register_autoload() {
   if (!$loaded) {
     $loaded = TRUE;
     $list = drush_commandfile_list();
-    $provision_dir = dirname($list['provision']);
-    include_once($provision_dir . '/provision.inc');
-    include_once($provision_dir . '/provision.service.inc');
-    provision_autoload_register_prefix('Provision_', dirname(__FILE__));
+    if (isset($list['provision'])) {
+      $provision_dir = dirname($list['provision']);
+      include_once($provision_dir . '/provision.inc');
+      include_once($provision_dir . '/provision.service.inc');
+      provision_autoload_register_prefix('Provision_', 'solr');
+    }
   }
 }
 
 /**
  * Implements hook_provision_services()
- * 
+ *
  *  Declares a new service type and a basic implementation of it.
  *  It matches the same service definition in the hosting front end.
  */
@@ -67,7 +68,7 @@ function solr_provision_apache_vhost_config($uri, $data) {
 
 /**
  * Append PHP code to Drupal's settings.php file.
- * 
+ *
  * @param $uri
  *   URI for the site.
  * @param $data
@@ -92,8 +93,8 @@ if (isset(\$_SERVER['solr_host'])) {
   /**
    * Implements hook_default_search_api_server_alter().
    * This only works for search_api.
-   * 
-   * Yes, I am using system.module's good name to implement this hook.  
+   *
+   * Yes, I am using system.module's good name to implement this hook.
    * How else can I define a hook in settings.php?  Would love suggestions.
    */
   function system_default_search_api_server_alter(array &\$defaults) {
