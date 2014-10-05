@@ -10,29 +10,41 @@
  */
 
 /**
- * Implements hook_provision_services()
- * 
- *  Declares a new service type and a basic implementation of it.
- *  It matches the same service definition in the hosting front end.
- */
-function solr_provision_services() {
-//  require_once('solr.service.inc');
-//  return array('solr' => NULL);
-}
-
-/**
  * Implements hook_drush_init()
  *
  * Ensures provision.drush.inc and provision.service.inc are included
  * before this file.
  */
 function solr_drush_init(){
-//  $list = drush_commandfile_list();
-//  $provision_drush_inc = $list['provision'];
-//  include_once($provision_drush_inc);
-//
-//  $service_provision = str_replace('provision.drush.inc', 'provision.service.inc', $provision_drush_inc);
-//  include_once($service_provision);
+  solr_provision_register_autoload();
+}
+
+/**
+ * Register our directory as a place to find Provision classes.
+ *
+ * This allows Provision to autoload our classes, so that we don't need to
+ * specifically include the files before we use the class.
+ */
+function solr_provision_register_autoload() {
+  static $loaded = FALSE;
+  if (!$loaded) {
+    $loaded = TRUE;
+    $list = drush_commandfile_list();
+    $provision_dir = dirname($list['provision']);
+    include_once($provision_dir . '/provision.inc');
+    include_once($provision_dir . '/provision.service.inc');
+    provision_autoload_register_prefix('Provision_', dirname(__FILE__));
+  }
+}
+
+/**
+ * Implements hook_provision_services()
+ * 
+ *  Declares a new service type and a basic implementation of it.
+ *  It matches the same service definition in the hosting front end.
+ */
+function solr_provision_services() {
+  return array('solr' => NULL);
 }
 
 /**

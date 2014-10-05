@@ -1,53 +1,12 @@
 <?php
 
-// Ripped off from http.drush.inc
-
-// Base solr service class.
-
-class provisionService_solr extends provisionService {
-  public $service = 'solr';
-
-  function verify_server_cmd() {
-    $this->create_config($this->context->type);
-    $this->parse_configs();
-  }
-
-  function verify_platform_cmd() {
-    $this->create_config($this->context->type);
-    $this->parse_configs();
-  }
-
-  function verify_site_cmd() {
-    $this->create_config($this->context->type);
-    $this->parse_configs();
-  }
-  
-  
-  /**
-   * Initialize the service along with the server object.
-   */
-  function init() {
-    parent::init();
-  }
-
-
-  /**
-   * Register the solr handler for platforms, based on the solr_server option.
-   */
-  static function subscribe_site($context) {
-    $context->setProperty('solr_server', '@server_master');
-    $context->setProperty('solr_config_path', '');
-    $context->setProperty('solr_war_path', '');
-    $context->is_oid('solr_server');
-    $context->service_subscribe('solr', $context->solr_server->name);
-  }
-}
-
-// Public solr service , as in non-encrypted and listening on a port.
-class provisionService_solr_public extends provisionService_solr {
+/**
+ * Public solr service , as in non-encrypted and listening on a port.
+ */
+class Provision_Service_solr_public extends Provision_Service_solr {
   protected $has_port = TRUE;
 
-  // The implementation chooses the port.   
+  // The implementation chooses the port.
   function default_port() {
     return FALSE;
   }
@@ -74,11 +33,11 @@ class provisionService_solr_public extends provisionService_solr {
 
   function init_server() {
     parent::init_server();
-    
+
     // application_name is tomcat, jetty, etc
     if (!is_null($this->application_name)) {
       $this->server->solr_app_path = "{$this->server->config_path}/{$this->application_name}";
-      
+
       // Get war path and solr_homes_path
       $this->server->solr_war_path = drush_get_option('solr_war_path', '/path/to/solr.war');
       $this->server->solr_homes_path = "{$this->server->config_path}/solr";
@@ -93,7 +52,7 @@ class provisionService_solr_public extends provisionService_solr {
 
   function verify_server_cmd() {
     if (!is_null($this->application_name)) {
-      
+
       // Create solr application folder (tomcat, etc)
       provision_file()->create_dir($this->server->solr_app_path, dt("Solr Application Folder"), 0700);
       $this->sync($this->server->solr_app_path);
@@ -105,11 +64,11 @@ class provisionService_solr_public extends provisionService_solr {
 
     parent::verify_server_cmd();
   }
-  
+
   function verify_site_cmd() {
     parent::verify_site_cmd();
   }
-  
+
 
   /**
    * Ask the web server to check for and load configuration changes.
@@ -118,6 +77,3 @@ class provisionService_solr_public extends provisionService_solr {
     return TRUE;
   }
 }
-
-
-include_once('solr.config.inc');
