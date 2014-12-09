@@ -33,15 +33,15 @@ class Provision_Service_solr_tomcat extends Provision_Service_solr_public {
   }
 
   function init_server() {
-    $this->configs['server'][] = 'provisionConfig_tomcat_server';
-    $this->configs['site'][] = 'provisionConfig_tomcat_site';
+    $this->configs['server'][] = 'Provision_Config_Tomcat_Server';
+    $this->configs['site'][] = 'Provision_Config_Tomcat_Site';
     parent::init_server();
   }
-
-  function config_data($config = null, $class = null) {
-    $data = parent::config_data($config, $class);
-    return $data;
-  }
+//
+//  function config_data($config = null, $class = null) {
+//    $data = parent::config_data($config, $class);
+//    return $data;
+//  }
 
   /**
    * Guess at the likely value of the http_restart_cmd.
@@ -50,8 +50,11 @@ class Provision_Service_solr_tomcat extends Provision_Service_solr_public {
    * service, even though it does not inherit this class.
    */
   public static function tomcat_restart_cmd() {
-    $command = '/etc/init.d/tomcat6'; // A proper default for most of the world
-    $options[] = $command;
+
+    // Try to detect the apache restart command.
+    $options[] = '/etc/init.d/tomcat7';
+    $options[] = '/etc/init.d/tomcat6';
+
     foreach ($options as $test) {
       if (is_executable($test)) {
         $command = $test;
