@@ -13,8 +13,6 @@
  * Implements hook_drush_init()
  */
 function solr_drush_init(){
-  // @TODO: This is failing.  Provision is trying to load the Solr service before this ever gets called.
-  drush_log('loading solr_drush_init', 'ok');
   solr_provision_register_autoload();
 }
 
@@ -28,13 +26,7 @@ function solr_provision_register_autoload() {
   static $loaded = FALSE;
   if (!$loaded) {
     $loaded = TRUE;
-    $list = drush_commandfile_list();
-    if (isset($list['provision'])) {
-      $provision_dir = dirname($list['provision']);
-      include_once($provision_dir . '/provision.inc');
-      include_once($provision_dir . '/provision.service.inc');
-      provision_autoload_register_prefix('Provision_', 'solr');
-    }
+    provision_autoload_register_prefix('Provision_', dirname(__FILE__));
   }
 }
 
@@ -45,6 +37,7 @@ function solr_provision_register_autoload() {
  *  It matches the same service definition in the hosting front end.
  */
 function solr_provision_services() {
+  solr_provision_register_autoload();
   return array('solr' => NULL);
 }
 
