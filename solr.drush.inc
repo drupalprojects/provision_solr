@@ -91,11 +91,30 @@ if (isset(\$_SERVER['solr_host'])) {
    * How else can I define a hook in settings.php?  Would love suggestions.
    */
   function system_default_search_api_server_alter(array &\$defaults) {
-    if (isset(\$defaults['localhost'])){
-      \$defaults['localhost']->options['host'] = \$_SERVER['solr_host'];
-      \$defaults['localhost']->options['port'] = \$_SERVER['solr_port'];
-      \$defaults['localhost']->options['path'] = \$_SERVER['solr_path'];
-    }
+
+    \$items['devshop_solr'] = entity_import('search_api_server', '{
+    "name" : "DevShop Solr Server",
+    "machine_name" : "devshop_solr",
+    "description" : "Provided by devshop environments only.",
+    "class" : "search_api_solr_service",
+    "options" : {
+      "clean_ids" : true,
+      "site_hash" : true,
+      "scheme" : "http",
+      "host" : \$_SERVER['solr_host'],
+      "port" : \$_SERVER['solr_port'],
+      "path" : \$_SERVER['solr_path'],
+      "http_user" : "",
+      "http_pass" : "",
+      "excerpt" : 0,
+      "retrieve_data" : 0,
+      "highlight_data" : 0,
+      "skip_schema_check" : 0,
+      "solr_version" : "",
+      "http_method" : "AUTO"
+    },
+    "enabled" : "1"
+  }');
   }
 }
 php;
