@@ -84,7 +84,7 @@ function solr_provision_drupal_config($uri, $data, $config = array()) {
 /**
  * Implements hook_default_search_api_server().
  */
-function engage_search_default_search_api_server() {
+function system_search_default_search_api_server() {
   \$items = array();
   \$items['devshop_solr'] = entity_import('search_api_server', '{
     "name" : "DevShop Solr",
@@ -95,9 +95,9 @@ function engage_search_default_search_api_server() {
       "clean_ids" : true,
       "site_hash" : true,
       "scheme" : "http",
-      "host" : \$_SERVER['solr_host"],
-      "port" : \$_SERVER['solr_port"],
-      "path" : \$_SERVER['solr_path"],
+      "host" : \$_SERVER['solr_host'],
+      "port" : \$_SERVER['solr_port'],
+      "path" : \$_SERVER['solr_path'],
       "http_user" : "",
       "http_pass" : "",
       "excerpt" : 0,
