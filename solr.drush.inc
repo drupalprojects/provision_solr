@@ -76,27 +76,40 @@ function solr_provision_apache_vhost_config($uri, $data) {
  * @see provisionConfig_drupal_settings
  */
 function solr_provision_drupal_config($uri, $data, $config = array()) {
-  $output =<<<php
-/**
- * Solr Server Config
- * We are mimicking aegir database settings here for Solr
- */
-if (isset(\$_SERVER['solr_host'])) {
 
-  /**
-   * Implements hook_default_search_api_server_alter().
-   * This only works for search_api.
-   *
-   * Yes, I am using system.module's good name to implement this hook.
-   * How else can I define a hook in settings.php?  Would love suggestions.
-   */
-  function system_default_search_api_server_alter(array &\$defaults) {
-    if (isset(\$defaults['localhost'])){
-      \$defaults['localhost']->options['host'] = \$_SERVER['solr_host'];
-      \$defaults['localhost']->options['port'] = \$_SERVER['solr_port'];
-      \$defaults['localhost']->options['path'] = \$_SERVER['solr_path'];
-    }
-  }
+  // @TODO: Support apachesolr.module as well.
+
+  $output =<<<php
+
+/**
+ * Implements hook_default_search_api_server().
+ */
+function engage_search_default_search_api_server() {
+  \$items = array();
+  \$items['devshop_solr'] = entity_import('search_api_server', '{
+    "name" : "DevShop Solr",
+    "machine_name" : "devshop_solr",
+    "description" : "Provided by DevShop.",
+    "class" : "search_api_solr_service",
+    "options" : {
+      "clean_ids" : true,
+      "site_hash" : true,
+      "scheme" : "http",
+      "host" : \$_SERVER['solr_host"],
+      "port" : \$_SERVER['solr_port"],
+      "path" : \$_SERVER['solr_path"],
+      "http_user" : "",
+      "http_pass" : "",
+      "excerpt" : 0,
+      "retrieve_data" : 0,
+      "highlight_data" : 0,
+      "skip_schema_check" : 0,
+      "solr_version" : "",
+      "http_method" : "AUTO"
+    },
+    "enabled" : "1"
+  }');
+  return \$items;
 }
 php;
 
