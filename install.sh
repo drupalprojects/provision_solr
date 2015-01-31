@@ -28,6 +28,8 @@ else
   tar -xvzf apache-solr-3.6.1.tgz
 fi
 
+
+
 #Create a shared folder for solr and move solr.war into it.
 mkdir /usr/share/tomcat6/solr
 mkdir /usr/share/tomcat6/webapps
