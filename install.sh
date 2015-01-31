@@ -24,7 +24,7 @@ cd /tmp
 if [ -r apache-solr-3.6.1.tgz ]; then
   echo "The file exists"
 else
-  wget http://apache.osuosl.org/lucene/solr/3.6.1/apache-solr-3.6.1.tgz
+  wget https://archive.apache.org/dist/lucene/solr/3.6.1/apache-solr-3.6.1.tgz
   tar -xvzf apache-solr-3.6.1.tgz
 fi
 
