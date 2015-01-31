@@ -33,7 +33,7 @@ fi
 #Create a shared folder for solr and move solr.war into it.
 mkdir /usr/share/tomcat6/solr
 mkdir /usr/share/tomcat6/webapps
-cp apache-solr-3.6.1/example/webapps/solr.war /usr/share/solr.war
+cp apache-solr-3.6.1/example/webapps/solr.war /usr/share/solr-3.6.1.war
 cp -r apache-solr-3.6.1/example/solr/* /usr/share/tomcat6/solr
 
 #Change own
