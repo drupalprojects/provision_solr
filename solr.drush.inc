@@ -53,9 +53,9 @@ function solr_provision_apache_vhost_config($uri, $data) {
   $path = "/" . $uri;
 
   return array(
-    "SetEnv solr_host $host",
-    "SetEnv solr_port $port",
-    "SetEnv solr_path $path",
+    "SetEnv aegir_solr_host $host",
+    "SetEnv aegir_solr_port $port",
+    "SetEnv aegir_solr_path $path",
   );
 }
 
@@ -76,43 +76,20 @@ function solr_provision_apache_vhost_config($uri, $data) {
  * @see provisionConfig_drupal_settings
  */
 function solr_provision_drupal_config($uri, $data, $config = array()) {
+  drush_log('Adding solr_url to settings.php');
 
-  // @TODO: Support apachesolr.module as well.
+  $host = d()->server->remote_host;
+  $port = d()->server->solr_port;
+  $path = $uri;
 
-//  $output =<<<php
-//
-///**
-// * Implements hook_default_search_api_server().
-// */
-//function system_default_search_api_server() {
-//  \$items = array();
-//  \$items['devshop_solr'] = entity_import('search_api_server', '{
-//    "name" : "DevShop Solr",
-//    "machine_name" : "devshop_solr",
-//    "description" : "Provided by DevShop.",
-//    "class" : "search_api_solr_service",
-//    "options" : {
-//      "clean_ids" : true,
-//      "site_hash" : true,
-//      "scheme" : "http",
-//      "host" : ' . \$_SERVER['solr_host'] . ',
-//      "port" : ' . \$_SERVER['solr_port'] . ',
-//      "path" : ' . \$_SERVER['solr_path'] . ',
-//      "http_user" : "",
-//      "http_pass" : "",
-//      "excerpt" : 0,
-//      "retrieve_data" : 0,
-//      "highlight_data" : 0,
-//      "skip_schema_check" : 0,
-//      "solr_version" : "",
-//      "http_method" : "AUTO"
-//    },
-//    "enabled" : "1"
-//  }');
-//  return \$items;
-//}
-//php;
-
-  return $output;
+  return <<<PHP
+  // Hosting Solr
+  // If \$_SERVER isn't available, set it here
+  if (empty(\$_SERVER['aegir_solr_host'])) {
+    \$_SERVER['aegir_solr_host'] = "$host";
+    \$_SERVER['aegir_solr_port'] = "$port";
+    \$_SERVER['aegir_solr_path'] = "$path";
+  }
+PHP;
 }
 
