@@ -78,8 +78,8 @@ function solr_provision_apache_vhost_config($uri, $data) {
 function solr_provision_drupal_config($uri, $data, $config = array()) {
   drush_log('Adding solr_url to settings.php');
 
-  $host = d()->server->remote_host;
-  $port = d()->server->solr_port;
+  $host = d()->solr_server->remote_host;
+  $port = d()->solr_server->solr_port;
   $path = $uri;
 
   return <<<PHP
