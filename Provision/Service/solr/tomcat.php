@@ -24,9 +24,9 @@ class Provision_Service_solr_tomcat extends Provision_Service_solr_public {
 
   protected $has_port = TRUE;
 
-  function default_restart_cmd() {
-    return Provision_Service_solr_tomcat::tomcat_restart_cmd();
-  }
+//  function default_restart_cmd() {
+//    return Provision_Service_solr_tomcat::tomcat_restart_cmd();
+//  }
 
   function default_port() {
     return 8080;
