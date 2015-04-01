@@ -48,8 +48,8 @@ function solr_provision_services() {
 function solr_provision_apache_vhost_config($uri, $data) {
   drush_log('Adding server variable for solr_url to vhost config.');
 
-  $host = $data['server']->remote_host;
-  $port = $data['server']->solr_port;
+  $host = d($uri)->solr_server->remote_host;
+  $port = d($uri)->solr_server->solr_port;
   $path = "/" . $uri;
 
   return array(
