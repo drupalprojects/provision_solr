@@ -86,7 +86,13 @@ function solr_provision_drupal_config($uri, $data, $config = array()) {
 
   $host = d()->solr_server->remote_host;
   $port = d()->solr_server->solr_port;
-  $path = "/" . $uri;
+
+  if (d()->solr_server->solr_service_type == 'jetty') {
+    $path = "/solr/" . $uri;
+  }
+  else {
+    $path = "/" . $uri;
+  }
 
   return <<<PHP
   // Hosting Solr
