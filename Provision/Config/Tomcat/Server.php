@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Apache server level configuration file class
+ * Tomcat server level configuration file class
  */
 class Provision_Config_Tomcat_Server extends Provision_Config_Solr_Server {
   protected $mode = 0755;
