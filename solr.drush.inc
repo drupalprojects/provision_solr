@@ -79,7 +79,7 @@ function solr_provision_apache_vhost_config($uri, $data) {
  * @see provisionConfig_drupal_settings
  */
 function solr_provision_drupal_config($uri, $data, $config = array()) {
-  drush_log('Adding solr_url to settings.php');
+  drush_log('Adding solr config info to settings.php');
 
   $host = d()->solr_server->remote_host;
   $port = d()->solr_server->solr_port;
@@ -93,7 +93,7 @@ function solr_provision_drupal_config($uri, $data, $config = array()) {
 
   return <<<PHP
   // Hosting Solr
-  // If \$_SERVER isn't available, set it here
+  // Use apachesolr or search_api alter hooks to use in your site.
   \$conf['aegir_solr_host'] = "$host";
   \$conf['aegir_solr_port'] = "$port";
   \$conf['aegir_solr_path'] = "$path";
