@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Base class for a site's Solr configuration files.
+ * Base configuration class for site level Solr configs.
  */
 class Provision_Config_Solr_Site extends Provision_Config_Solr {
 
@@ -23,14 +23,21 @@ class Provision_Config_Solr_Site extends Provision_Config_Solr {
 
     // Create the solr home dir if its not there yet. (~/config/SERVER/solr/SITE)
     if (!provision_file()->exists($solr_home)->status()) {
-      drush_mkdir($solr_home);
-      drush_mkdir($solr_home . '/conf');
-      drush_log(dt('Created a new SOLR_HOME at !home', $t));
+      provision_file()->mkdir($solr_home)
+        ->succeed('Created directory @path.')
+        ->fail('Created a new SOLR_HOME at @path.');
+
+      provision_file()->mkdir($solr_home . '/conf')
+        ->succeed('Created directory @path.')
+        ->fail('Could not created a new SOLR_HOME at @path.');
     }
 
     if (!file_exists($path_to_default_conf)) {
       return drush_set_error(DRUSH_FRAMEWORK_ERROR, 'default solr config files not found at ' . $path_to_default_conf);
     }
+
+    // Copying default solr config from this module.
+    // NOTE: Cannot use provision_file() because it uses copy() which only allows files.
     drush_log(dt('Copying default solr conf files in !default to SOLR_HOME at !home', $t), 'ok');
     drush_shell_exec("cp -rf $path_to_default_conf $solr_home/conf");
 
@@ -44,6 +51,13 @@ class Provision_Config_Solr_Site extends Provision_Config_Solr {
 
   function unlink() {
     parent::unlink();
+
+    $home_dir = $this->data['solr_home'];
+
+    // Remove solr home folder.
+    provision_file()->rmdir($home_dir)
+      ->succeed('Solr Home folder was removed: @path.')
+      ->fail('Could not remove Solr Home folder: @path.');
   }
 
   function process() {
