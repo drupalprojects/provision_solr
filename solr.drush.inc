@@ -46,23 +46,23 @@ function solr_provision_services() {
  * Adds the $_ENV['solr_url'] variable to the VHOST
  */
 function solr_provision_apache_vhost_config($uri, $data) {
-  drush_log('Adding server variable for solr_url to vhost config.');
-
-  $host = d($uri)->solr_server->remote_host;
-  $port = d($uri)->solr_server->solr_port;
-
-  if (d($uri)->solr_server->solr_service_type == 'jetty') {
-    $path = "/solr/" . $uri;
-  }
-  else {
-    $path = "/" . $uri;
-  }
-
-  return array(
-    "SetEnv aegir_solr_host $host",
-    "SetEnv aegir_solr_port $port",
-    "SetEnv aegir_solr_path $path",
-  );
+//  drush_log('Adding server variable for solr_url to vhost config.');
+//
+//  $host = d($uri)->solr_server->remote_host;
+//  $port = d($uri)->solr_server->solr_port;
+//
+//  if (d($uri)->solr_server->solr_service_type == 'jetty') {
+//    $path = "/solr/" . $uri;
+//  }
+//  else {
+//    $path = "/" . $uri;
+//  }
+//
+//  return array(
+//    "SetEnv aegir_solr_host $host",
+//    "SetEnv aegir_solr_port $port",
+//    "SetEnv aegir_solr_path $path",
+//  );
 }
 
 /**
@@ -75,9 +75,6 @@ function solr_provision_apache_vhost_config($uri, $data) {
  *
  * @return
  *   Lines to add to the site's settings.php file.
- *
- *   @TODO: THIS IS FORCED UPON USERS at the moment.... we should detect if
- *   the site is using apachesolr or searchapi!
  *
  * @see provisionConfig_drupal_settings
  */
@@ -97,11 +94,9 @@ function solr_provision_drupal_config($uri, $data, $config = array()) {
   return <<<PHP
   // Hosting Solr
   // If \$_SERVER isn't available, set it here
-  if (empty(\$_SERVER['aegir_solr_host'])) {
-    \$_SERVER['aegir_solr_host'] = "$host";
-    \$_SERVER['aegir_solr_port'] = "$port";
-    \$_SERVER['aegir_solr_path'] = "$path";
-  }
+  \$conf['aegir_solr_host'] = "$host";
+  \$conf['aegir_solr_port'] = "$port";
+  \$conf['aegir_solr_path'] = "$path";
 PHP;
 }
 
