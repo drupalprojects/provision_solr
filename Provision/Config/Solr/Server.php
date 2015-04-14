@@ -2,10 +2,7 @@
 
 /**
  * Base configuration class for server level Solr configs.
- *
- * This class uses the service defined application_name, to generate
- * a top level $app_name.conf for the service.
- *
+
  * Each server has it's own configuration, and this class will
  * automatically generate a symlink to the correct file for each
  * server.
@@ -25,10 +22,11 @@ class Provision_Config_Solr_Server extends Provision_Config_Solr {
         escapeshellarg($this->data['server']->aegir_root . '/config/')
       );
       if ($this->data['server']->shell_exec($cmd)) {
-        drush_log(dt("Created symlink for %file on %server", array(
-          '%file' => $filename,
-          '%server' => $this->data['server']->remote_host,
-        )));
+        drush_log(dt("Created symlink for !file on !server, for !application", array(
+          '!file' => $filename,
+          '!server' => $this->data['server']->remote_host,
+          '!application' => $this->data['application_name'],
+        )), 'success');
       };
     }
     parent::write();
