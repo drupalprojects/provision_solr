@@ -1,1 +1,1 @@
-devshop: yes
+dataDir: /var/solr/data/<?php print $this->uri; ?>
